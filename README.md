@@ -1,2 +1,3 @@
-# importance-sampling-2022
-CMF 2022 laboratory project (please change to actual description)
+# Modeling Tails of Distributions by Importance Sampling: Application in Risk-Management
+
+This repository contains code for the project "Modeling Tails of Distributions by Importance Sampling: Application in Risk-Management". The aim of the project is to estimate Value at Risk (VaR) and Expected Shortfall (ES) risk measurements of a financial portfolio by the Importance Smapling technique.
