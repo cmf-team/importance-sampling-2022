@@ -35,14 +35,14 @@ def stocks_returns(assets, weights, from_date, to_date):
     data = []
     for name in assets:
         results = search_assets(query=name, limit=1, type="Stock",
-                                exchange="NASDAQ")  # Returns a list with all the results found in Investing.com
+                                exchange="NASDAQ")
 
         investing_id = int(results[0]["ticker"])
         data.append(historical_data(investing_id=investing_id, from_date=from_date, to_date=to_date))
 
     res_ser = make_profit(data, weights)
     return res_ser
-    #raise Exception(NotImplementedError)
+
 
 def commodities_returns(assets, weights, from_date, to_date):
     from_date = make_date(from_date, -1)
@@ -50,15 +50,14 @@ def commodities_returns(assets, weights, from_date, to_date):
 
     data = []
     for name in assets:
-        results = search_assets(query=name, limit=1, type="Commodity")  # Returns a list with all the results found in Investing.com
-        print(results)
+        results = search_assets(query=name, limit=1, type="Commodity")
 
         investing_id = int(results[0]["ticker"])
         data.append(historical_data(investing_id=investing_id, from_date=from_date, to_date=to_date))
 
     res_ser = make_profit(data, weights)
     return res_ser
-    #raise Exception(NotImplementedError)
+
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
     from_date = make_date(from_date, -1)
@@ -66,11 +65,10 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
 
     data = []
     for name in assets:
-        results = search_assets(query=name, limit=1)  # Returns a list with all the results found in Investing.com
+        results = search_assets(query=name, limit=1)
 
         investing_id = int(results[0]["ticker"])
         data.append(historical_data(investing_id=investing_id, from_date=from_date, to_date=to_date))
     res_ser = make_profit(data, weights)
     return res_ser
-    #raise Exception(NotImplementedError)
 
