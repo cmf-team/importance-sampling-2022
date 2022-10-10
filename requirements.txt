@@ -1,2 +1,9 @@
 pandas
 numpy
+datetime
+yfinance
+matplotlib
+pandas
+numpy
+requests
+json
