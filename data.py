@@ -12,7 +12,6 @@ def the_day_before_start(date, days_count):
 
 #portfolio принимает в себя фрейм цен и считает доходность 
 def portfolio(prices, assets, weights, from_date, to_date):
-  prices = prices.drop(['Unnamed: 0'], axis=1)
   prices.index = pd.to_datetime(prices.index)
   from_date_new = the_day_before_start(from_date, -1)
   prices_assets = prices.loc[from_date_new:to_date, assets]
@@ -32,7 +31,7 @@ def portfolio(prices, assets, weights, from_date, to_date):
 
 #stocks_returns загружает stocks и считает доходность 
 def stocks_returns(assets, weights, from_date, to_date):
-  url = 'https://drive.google.com/file/d/1jVPu2E7KmZe27cR2aZKCoU7QqYjMHHKI/view?usp=sharing'
+  url = 'https://drive.google.com/file/d/1hG9vEXemZMY8a8dnX0an_KGr8suCijwU/view?usp=sharing'
   gdown.download(url, 'stock_prices.csv', fuzzy=True)
   stock_prices = pd.read_csv('stock_prices.csv', index_col='date')
   stock_returns = portfolio(stock_prices, assets, weights, from_date, to_date)
@@ -40,7 +39,7 @@ def stocks_returns(assets, weights, from_date, to_date):
 
 #commodities_returns загружает commodities и считает доходность
 def commodities_returns(assets, weights, from_date, to_date):
-  url = 'https://drive.google.com/file/d/1haE9FdhhN8fNJHL4rvs10rm_5rc8UQ99/view?usp=sharing'
+  url = 'https://drive.google.com/file/d/1qnP2Ft1OgChPirHBpDrG6f--PDmm0jLY/view?usp=sharing'
   gdown.download(url, 'commodities_prices.csv', fuzzy=True)
   commodities_prices = pd.read_csv('commodities_prices.csv', index_col='date')
   commodities_returns = portfolio(commodities_prices, assets, weights, from_date, to_date)
@@ -48,7 +47,7 @@ def commodities_returns(assets, weights, from_date, to_date):
 
 #cryptocurrencies_returns загружает cryptocurrencies и считает доходность
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-  url = 'https://drive.google.com/file/d/14gwsIiB59al4cRMhFvyDghmWCE-IeAxj/view?usp=sharing'
+  url = 'https://drive.google.com/file/d/1XMn8f_iGPtqB1iJQQ63pN_AQ0UynVzct/view?usp=sharing'
   gdown.download(url, 'cryptocurrencies_prices.csv', fuzzy=True)
   cryptocurrencies_prices = pd.read_csv('cryptocurrencies_prices.csv', index_col='date')
   cryptocurrencies_returns = portfolio(cryptocurrencies_prices, assets, weights, from_date, to_date)
