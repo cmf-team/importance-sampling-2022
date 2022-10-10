@@ -1,66 +1,55 @@
 import pandas as pd
 import numpy as np
 import gdown
+from datetime import datetime, timedelta
 
+#the_day_before_start функция нужна чтобы получить дату на 1 день раньше требуемого чтобы вычислить доходность первого дня
+def the_day_before_start(date, days_count):
+    to_date_tmp = datetime.strptime(date, '%m/%d/%Y')
+    to_date_tmp = to_date_tmp + timedelta(days=days_count)
+    date = to_date_tmp.strftime('%m/%d/%Y')
+    return date
+
+#portfolio принимает в себя фрейм цен и считает доходность 
+def portfolio(prices, assets, weights, from_date, to_date):
+  prices = prices.drop(['Unnamed: 0'], axis=1)
+  prices.index = pd.to_datetime(prices.index)
+  from_date_new = the_day_before_start(from_date, -1)
+  prices_assets = prices.loc[from_date_new:to_date, assets]
+  count = 0
+  for column in prices_assets:
+    prices_assets.loc[:, column] = prices_assets[column] * weights[count]
+    count+=1
+  prices_assets['price'] = prices_assets.loc[:, :].sum(axis=1)
+  returns = []
+  for i in range(1, len(prices_assets)):
+    day_return = (prices_assets['price'][i] - prices_assets['price'][i-1]) / prices_assets['price'][i-1]
+    returns.append(day_return)
+  prices_assets = prices_assets.drop(index=[from_date_new])
+  prices_assets['return'] = returns
+  prices_assets['return']
+  return prices_assets['return']
+
+#stocks_returns загружает stocks и считает доходность 
 def stocks_returns(assets, weights, from_date, to_date):
-  url = 'https://drive.google.com/file/d/1k9yqsSTtteN6FADDWH8In_9LkFhKJlq_/view?usp=sharing'
+  url = 'https://drive.google.com/file/d/1jVPu2E7KmZe27cR2aZKCoU7QqYjMHHKI/view?usp=sharing'
   gdown.download(url, 'stock_prices.csv', fuzzy=True)
   stock_prices = pd.read_csv('stock_prices.csv', index_col='date')
-  stock_prices = stock_prices.drop(['Unnamed: 0'], axis=1)
-  stock_prices.index = pd.to_datetime(stock_prices.index)
-  stock_prices_cut = stock_prices[from_date:to_date]
-  stock_prices_assets = stock_prices_cut[assets]
-  count = 0
-  for column in stock_prices_assets:
-    stock_prices_assets.loc[:, column] = stock_prices_assets[column] * weights[count]
-    count+=1
-  stock_prices_assets['price'] = stock_prices_assets.loc[:, :].sum(axis=1)
-  returns = [np.NaN]
-  for i in range(1, len(stock_prices_asset)):
-    day_return = (stock_prices_assets['price'][i] - stock_prices_assets['price'][i-1]) / stock_prices_assets['price'][i-1]
-    returns.append(day_return)
-  stock_prices_assets['return'] = returns
-  stock_prices_assets['return']
-  return stock_prices_assets['return']
+  stock_returns = portfolio(stock_prices, assets, weights, from_date, to_date)
+  return stock_returns
 
+#commodities_returns загружает commodities и считает доходность
 def commodities_returns(assets, weights, from_date, to_date):
-  url = 'https://drive.google.com/file/d/1hVasCNz-qZcBYqvvdlrGAcuc5rNDfPw1/view?usp=sharing'
+  url = 'https://drive.google.com/file/d/1haE9FdhhN8fNJHL4rvs10rm_5rc8UQ99/view?usp=sharing'
   gdown.download(url, 'commodities_prices.csv', fuzzy=True)
   commodities_prices = pd.read_csv('commodities_prices.csv', index_col='date')
-  commodities_prices = commodities_prices.drop(['Unnamed: 0'], axis=1)
-  commodities_prices.index = pd.to_datetime(commodities_prices.index)
-  commodities_prices_cut = commodities_prices[from_date:to_date]
-  commodities_prices_assets = commodities_prices_cut[assets]
-  count = 0
-  for column in commodities_prices_assets:
-    commodities_prices_assets.loc[:, column] = commodities_prices_assets[column] * weights[count]
-    count+=1
-  commodities_prices_assets['price'] = commodities_prices_assets.loc[:, :].sum(axis=1)
-  returns = [np.NaN]
-  for i in range(1, len(commodities_prices_assets)):
-    day_return = (commodities_prices_assets['price'][i] - commodities_prices_assets['price'][i-1]) / commodities_prices_assets['price'][i-1]
-    returns.append(day_return)
-  commodities_prices_assets['return'] = returns
-  commodities_prices_assets['return']
-  return commodities_prices_assets['return']
+  commodities_returns = portfolio(commodities_prices, assets, weights, from_date, to_date)
+  return commodities_returns
 
+#cryptocurrencies_returns загружает cryptocurrencies и считает доходность
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-  url = 'https://drive.google.com/file/d/1_t11ugm0P2Yat-jFjRoqnyQ_8PFmxsd9/view?usp=sharing'
+  url = 'https://drive.google.com/file/d/14gwsIiB59al4cRMhFvyDghmWCE-IeAxj/view?usp=sharing'
   gdown.download(url, 'cryptocurrencies_prices.csv', fuzzy=True)
   cryptocurrencies_prices = pd.read_csv('cryptocurrencies_prices.csv', index_col='date')
-  cryptocurrencies_prices = cryptocurrencies_prices.drop(['Unnamed: 0'], axis=1)
-  cryptocurrencies_prices.index = pd.to_datetime(cryptocurrencies_prices.index)
-  cryptocurrencies_prices_cut = cryptocurrencies_prices[from_date:to_date]
-  cryptocurrencies_prices_assets = cryptocurrencies_prices_cut[assets]
-  count = 0
-  for column in cryptocurrencies_prices_assets:
-    cryptocurrencies_prices_assets.loc[:, column] = cryptocurrencies_prices_assets[column] * weights[count]
-    count+=1
-  cryptocurrencies_prices_assets['price'] = cryptocurrencies_prices_assets.loc[:, :].sum(axis=1)
-  returns = [np.NaN]
-  for i in range(1, len(cryptocurrencies_prices_assets)):
-    day_return = (cryptocurrencies_prices_assets['price'][i] - cryptocurrencies_prices_assets['price'][i-1]) / cryptocurrencies_prices_assets['price'][i-1]
-    returns.append(day_return)
-  cryptocurrencies_prices_assets['return'] = returns
-  cryptocurrencies_prices_assets['return']
-  return cryptocurrencies_prices_assets['return']
+  cryptocurrencies_returns = portfolio(cryptocurrencies_prices, assets, weights, from_date, to_date)
+  return cryptocurrencies_returns
