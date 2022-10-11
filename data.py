@@ -4,6 +4,7 @@ import investiny as inv
 
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
+    from_date = (dt.datetime.strptime(from_date, '%m/%d/%Y')-dt.timedelta(days=1)).strftime('%m/%d/%Y')
     to_date= (dt.datetime.strptime(to_date, '%m/%d/%Y')+dt.timedelta(days=1)).strftime('%m/%d/%Y')
     returns = pd.DataFrame()
     for asset in assets:
@@ -19,6 +20,7 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
     returns['wipim1'] = returns.wipim1.shift(1)   
     return (returns['widiff']/returns['wipim1']).dropna();
 def stocks_returns(assets, weights, from_date, to_date):
+    from_date = (dt.datetime.strptime(from_date, '%m/%d/%Y')-dt.timedelta(days=1)).strftime('%m/%d/%Y')
     to_date= (dt.datetime.strptime(to_date, '%m/%d/%Y')+dt.timedelta(days=1)).strftime('%m/%d/%Y')
     returns = pd.DataFrame()
     for asset in assets:
@@ -34,6 +36,7 @@ def stocks_returns(assets, weights, from_date, to_date):
     returns['wipim1'] = returns.wipim1.shift(1)   
     return (returns['widiff']/returns['wipim1']).dropna();
 def commodities_returns(assets, weights, from_date, to_date):
+    from_date = (dt.datetime.strptime(from_date, '%m/%d/%Y')-dt.timedelta(days=1)).strftime('%m/%d/%Y')
     to_date= (dt.datetime.strptime(to_date, '%m/%d/%Y')+dt.timedelta(days=1)).strftime('%m/%d/%Y')
     returns = pd.DataFrame()
     for asset in assets:
@@ -49,7 +52,9 @@ def commodities_returns(assets, weights, from_date, to_date):
     returns['wipim1'] = returns.wipim1.shift(1)   
     return (returns['widiff']/returns['wipim1']).dropna();
 
-
+assets = ['APPL']
+weights = [1.]
+print(stocks_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022'))
 # TEST DATA
 # stocks = ['APPL','GOOGL']
 # cryptos = ['BTCUSD','BNBUSD']
