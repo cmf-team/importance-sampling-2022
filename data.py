@@ -52,9 +52,6 @@ def commodities_returns(assets, weights, from_date, to_date):
     returns['wipim1'] = returns.wipim1.shift(1)   
     return (returns['widiff']/returns['wipim1']).dropna();
 
-assets = ['APPL']
-weights = [1.]
-print(stocks_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022'))
 # TEST DATA
 # stocks = ['APPL','GOOGL']
 # cryptos = ['BTCUSD','BNBUSD']
