@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from datetime import timedelta, datetime
 
-#сдвиг даты на любое кл-во дней - необходимо чтобы в результатах учитывался весь указанный период
+#date shift by any number of days - it is necessary that the results take into account the entire specified period
 def change_date(date, days_count):
     to_date_tmp = datetime.strptime(date, '%m/%d/%Y')
     to_date_tmp = to_date_tmp + timedelta(days=days_count)
@@ -15,7 +15,7 @@ def change_date(date, days_count):
     return date
 
 
-#процесс получения данных по истории
+#the process for history data
 def get_lst_assets(assets, from_date, to_date, types = "False", exchange = "False"):
     lst= []
     for name in assets:
@@ -35,12 +35,12 @@ def get_lst_assets(assets, from_date, to_date, types = "False", exchange = "Fals
     return pd.DataFrame(data = np.array(lst), columns = lst_date)
 
 
-#создание портфеля
+#creating a portfolio
 def profit(data, weights):
-    #перемножение данных с весами и сложение
+    #multiplication of data with weights and addition
     new_data = pd.DataFrame([data.loc[i]*weights[i] for i in range(len(data))]).sum(axis=0)
     
-    #вычисление returns для портфеля
+    #calculating returns for a portfolio
     result = new_data.copy(deep=True)
     for i in range(1, len(new_data)):
         result[i] = (new_data[i] - new_data[i-1])/new_data[i-1]
@@ -72,6 +72,3 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
     returns = profit(data, weights)
     
     return returns
-
-
-
