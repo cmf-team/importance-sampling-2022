@@ -1,5 +1,11 @@
 import pandas as pd
 import numpy as np
+import investiny
+from investiny import historical_data
+from investiny import search_assets
+from datetime import datetime, timedelta
+
+
 
 def stocks_returns(assets, weights, from_date, to_date):
     
