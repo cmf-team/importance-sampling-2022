@@ -9,6 +9,9 @@ def stocks_returns(assets, weights, from_date, to_date):
     Constructs the returns of stock portfolio
     Args:
     assets - tickers of assets
+    Possible assets:
+    AAPL, AMD, AMZN, GOOGL, INTC, META, MSFT, MU, NVDA, TSLA
+
     weights - weights of portfolio, should sum up to one
     from_date - start date, mm/dd/yyyy
     to_date - end_date, mm/dd/yyyy
@@ -23,6 +26,10 @@ def commodities_returns(assets, weights, from_date, to_date):
     Constructs the returns of commodities portfolio
     Args:
     assets - tickers of assets
+    Possible assets:
+    Brent Oil, Copper, Crude Oil WTI, Gold, Heating Oil,
+    Natural Gas, Platinum, Silver, US Coffee C, US Corn
+
     weights - weights of portfolio, should sum up to one
     from_date - start date, mm/dd/yyyy
     to_date - end_date, mm/dd/yyyy
@@ -37,6 +44,9 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
     Constructs the returns of crypto portfolio
     Args:
     assets - tickers of assets
+    Possible assets:
+    ADA, BNB, BTC, BUSD, DOGE, ETH, SOL, USDC, USDT, XRP
+
     weights - weights of portfolio, should sum up to one
     from_date - start date, mm/dd/yyyy
     to_date - end_date, mm/dd/yyyy
