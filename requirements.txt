@@ -2,6 +2,4 @@ pandas
 numpy
 investiny
 historical_data
-search_assets
 datetime
-timedelta
