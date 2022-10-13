@@ -23,7 +23,13 @@ def stocks_returns(assets, weights, from_date, to_date):
         portfolio = pd.DataFrame(portfolio)
         portfolio['return'] = portfolio['Adj Close'] / portfolio['Adj Close'].shift(1) - 1
     else:
-        portfolio['portfolio'] = portfolio.values @ weights
+        portfolio['portfolio'] = portfolio.values @ weights 
+        # I personally feel that this is wrong way to calculate the portfolio returns. But it is done
+        # exactly according to provided google document. I also attach here another (commented) chunk that
+        # I belive calculates the portfolio returns right - by weighting returns of each asset, not their price:
+        # for asset in assets:
+        #     portfolio[asset] = portfolio[asset] / portfolio[asset].shift(1) - 1
+        # portfolio['return'] = portfolio.values @ weights
         portfolio['return'] = portfolio['portfolio'] / portfolio['portfolio'].shift(1) - 1
     portfolio.reset_index(inplace=True)
     portfolio['Date'] = pd.to_datetime(portfolio['Date'].dt.strftime('%Y-%m-%d'))
