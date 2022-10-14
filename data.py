@@ -61,16 +61,16 @@ def stocks_returns(assets, weights, from_date, to_date):
             stock_data[date_history[day]] = (arr_of_day_price[day]-arr_of_day_price[day-1])/arr_of_day_price[day-1]
     print(stock_data)
     return stock_data
-stocks_returns(["AAPL"], [1], "9/1/2022", "09/07/2022")
+# stocks_returns(["AAPL"], [1], "9/1/2022", "09/07/2022")
 
 
 def commodities_returns(assets, weights, from_date, to_date):
     return com_n_crypto(assets, weights, from_date, to_date)
 
-# commodities_returns(["brent-oil"], [1], "09/01/2022", "09/07/2022")
+
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
     return com_n_crypto(assets, weights, from_date, to_date)
 
 
-cryptocurrencies_returns(["ETH", "BTC"], [0.3, 0.7], "09/01/2022", "09/07/2022")
+# cryptocurrencies_returns(["ETH", "BTC"], [0.3, 0.7], "09/01/2022", "09/07/2022")
 
