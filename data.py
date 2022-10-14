@@ -20,13 +20,14 @@ def com_n_crypto(assets, weights, from_date, to_date):
 
 
         for price in range(0, len(price_history)):
-            try:
+            if (len(arr_of_day_price) - 1 < price):
                 arr_of_day_price.append(price_history[price] * weights[asset_number % len(assets)])
-            except:
+            else:
                 arr_of_day_price[price] += price_history[price] * weights[asset_number % len(assets)]
         asset_number += 1
 
     for day in range(1, len(price_history)):
+        # if stock_data doesn't have an element at index pd.to_datetime(date_history[day]) then adding a value to it will fail and we need to assign a new value there (except block)
         try:
             stock_data[pd.to_datetime(date_history[day])] += (arr_of_day_price[day] - arr_of_day_price[day - 1]) / \
                                                              arr_of_day_price[day - 1]
@@ -54,13 +55,14 @@ def stocks_returns(assets, weights, from_date, to_date):
         asset_number += 1
 
     for day in range(1, len(price_history)):
-        # today_return +=
+        # if stock_data doesn't have an element at index date_history[day] then adding a value to it will fail and we need to assign a new value there
         try:
             stock_data[date_history[day]] += (arr_of_day_price[day]-arr_of_day_price[day-1])/arr_of_day_price[day-1]
         except:
             stock_data[date_history[day]] = (arr_of_day_price[day]-arr_of_day_price[day-1])/arr_of_day_price[day-1]
     print(stock_data)
     return stock_data
+
 # stocks_returns(["AAPL"], [1], "9/1/2022", "09/07/2022")
 
 
