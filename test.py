@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from data import stocks_returns
 
+
 def test_stocks_returns():
     assets = ['AAPL']
     weights = [1.]
