@@ -1,2 +1,5 @@
 pandas
 numpy
+investpy
+pandas_datareader
+datetime
