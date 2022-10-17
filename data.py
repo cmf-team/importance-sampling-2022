@@ -4,12 +4,9 @@ from investiny import historical_data, search_assets
 
 def download_and_count(assets: list, weights: list, 
                    from_date: str, to_date: str) -> pd.Series:
-    
     from_date = pd.Timestamp(from_date.replace("/", "-"))
-    from_date = pd.Timestamp(from_date)
     from_date = from_date - pd.Timedelta(days=1)
-    from_date = str(from_date)
-    from_date = from_date.replace("-", "/").split()[0]
+    from_date = str(from_date).replace("-", "/").split()[0]
     tmp = from_date.split("/")
     from_date = tmp[1] + "/" + tmp[2] + "/" +tmp[0]
    
