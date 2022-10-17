@@ -11,7 +11,7 @@ def download_and_count(assets: list, weights: list,
     from_date = str(from_date)
     from_date = from_date.replace("-", "/").split()[0]
     tmp = from_date.split("/")
-    from_date = tmp[1]+"/"+tmp[2]+"/"+tmp[0]
+    from_date = tmp[1] + "/" + tmp[2] + "/" +tmp[0]
    
     def __procedure(asset):    
         search_results = search_assets(query=asset, limit=2000)
