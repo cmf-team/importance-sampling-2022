@@ -18,7 +18,7 @@ def stocks_returns(assets, weights, from_date, to_date):
         print('Assets and Weights lenght do not match. Correct the vectors.')
         return None
     symbols = yf.download(assets, from_date, to_date)
-    symbols = symbols['Adj Close'].reset_index()
+    symbols = symbols['Close'].reset_index()
     symbols['Date'] = pd.to_datetime(symbols['Date'].dt.strftime('%Y-%m-%d'))
     symbols.index = symbols['Date']
     symbols.drop('Date', axis = 1, inplace = True)
@@ -28,7 +28,11 @@ def stocks_returns(assets, weights, from_date, to_date):
     symbols = symbols.iloc[1:, :]
     symbols = symbols.fillna(0)
     
+    if len(assets)==1:
+        symbols.columns = assets
+    
     symbols['portfolio'] = [0]*symbols.shape[0]
+    
     for i in range(len(assets)):
         column = assets[i]
         weight = weights[i]
@@ -51,9 +55,10 @@ def commodities_returns(assets, weights, from_date, to_date):
     if len(assets) != len(weights):
         print('Assets and Weights lenght do not match. Correct the vectors.')
         return None
+    
     symbols_list = [commodities_dict[asset] for asset in assets]
     symbols = yf.download(symbols_list, from_date, to_date)
-    symbols = symbols['Adj Close'].reset_index()
+    symbols = symbols['Close'].reset_index()
     symbols['Date'] = pd.to_datetime(symbols['Date'].dt.strftime('%Y-%m-%d'))
     symbols.index = symbols['Date']
     symbols.drop('Date', axis = 1, inplace = True)
@@ -61,6 +66,9 @@ def commodities_returns(assets, weights, from_date, to_date):
         symbols[column] = (symbols[column] - symbols[column].shift(1))/symbols[column]
     symbols = symbols.iloc[1:, :]
     symbols = symbols.fillna(0)
+    
+    if len(symbols_list)==1:
+        symbols.columns = symbols_list
     
     symbols['portfolio'] = [0]*symbols.shape[0]
     for i in range(len(symbols_list)):
@@ -85,7 +93,7 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
         print('Assets and Weights lenght do not match. Correct the vectors.')
         return None
     symbols = yf.download(assets, from_date, to_date)
-    symbols = symbols['Adj Close'].reset_index()
+    symbols = symbols['Close'].reset_index()
     symbols['Date'] = pd.to_datetime(symbols['Date'].dt.strftime('%Y-%m-%d'))
     symbols.index = symbols['Date']
     symbols.drop('Date', axis = 1, inplace = True)
@@ -94,6 +102,9 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
         symbols[column] = (symbols[column] - symbols[column].shift(1))/symbols[column]
     symbols = symbols.iloc[1:, :]
     symbols = symbols.fillna(0)
+    
+    if len(assets)==1:
+        symbols.columns = assets
     
     symbols['portfolio'] = [0]*symbols.shape[0]
     for i in range(len(assets)):
