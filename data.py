@@ -17,6 +17,10 @@ def stocks_returns(assets, weights, from_date, to_date):
     if len(assets) != len(weights):
         print('Assets and Weights lenght do not match. Correct the vectors.')
         return None
+    desired_start_date = dt.datetime.strptime(from_date, '%m/%d/%Y')
+    from_date =  desired_start_date - dt.timedelta(7)
+    to_date = dt.datetime.strptime(to_date, '%m/%d/%Y') + dt.timedelta(1)
+    
     symbols = yf.download(assets, from_date, to_date)
     symbols = symbols['Close'].reset_index()
     symbols['Date'] = pd.to_datetime(symbols['Date'].dt.strftime('%Y-%m-%d'))
@@ -32,7 +36,7 @@ def stocks_returns(assets, weights, from_date, to_date):
         symbols.columns = assets
     
     symbols['portfolio'] = [0]*symbols.shape[0]
-    
+    symbols = symbols[symbols.index >= desired_start_date]
     for i in range(len(assets)):
         column = assets[i]
         weight = weights[i]
@@ -55,6 +59,9 @@ def commodities_returns(assets, weights, from_date, to_date):
     if len(assets) != len(weights):
         print('Assets and Weights lenght do not match. Correct the vectors.')
         return None
+    desired_start_date = dt.datetime.strptime(from_date, '%m/%d/%Y')
+    from_date =  desired_start_date - dt.timedelta(7)
+    to_date = dt.datetime.strptime(to_date, '%m/%d/%Y') + dt.timedelta(1)
     
     symbols_list = [commodities_dict[asset] for asset in assets]
     symbols = yf.download(symbols_list, from_date, to_date)
@@ -66,7 +73,7 @@ def commodities_returns(assets, weights, from_date, to_date):
         symbols[column] = (symbols[column] - symbols[column].shift(1))/symbols[column]
     symbols = symbols.iloc[1:, :]
     symbols = symbols.fillna(0)
-    
+    symbols = symbols[symbols.index >= desired_start_date]
     if len(symbols_list)==1:
         symbols.columns = symbols_list
     
@@ -92,6 +99,10 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
     if len(assets) != len(weights):
         print('Assets and Weights lenght do not match. Correct the vectors.')
         return None
+    desired_start_date = dt.datetime.strptime(from_date, '%m/%d/%Y')
+    from_date =  desired_start_date - dt.timedelta(7)
+    to_date = dt.datetime.strptime(to_date, '%m/%d/%Y') + dt.timedelta(1)
+    
     symbols = yf.download(assets, from_date, to_date)
     symbols = symbols['Close'].reset_index()
     symbols['Date'] = pd.to_datetime(symbols['Date'].dt.strftime('%Y-%m-%d'))
@@ -102,7 +113,7 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
         symbols[column] = (symbols[column] - symbols[column].shift(1))/symbols[column]
     symbols = symbols.iloc[1:, :]
     symbols = symbols.fillna(0)
-    
+    symbols = symbols[symbols.index >= desired_start_date]
     if len(assets)==1:
         symbols.columns = assets
     
