@@ -23,5 +23,5 @@ def test_stocks_returns():
         index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
     )
     print('difference is ', (returns.values - test_returns.values).round(4))
-    ## allocation will be passed if atol = 0.0008
+    ## allocation will be passed if atol = 0.0009
     assert np.allclose(returns, test_returns, atol=0.0001)
