@@ -1,4 +1,4 @@
 pandas
 numpy
-investiny  1.0.8
+investiny==1.0.8
 datetime
