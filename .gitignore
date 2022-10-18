@@ -7,5 +7,5 @@ __pycache__
 /historical_data.zip
 
 # Task 1
-/get_csv_data.ipynb
-/test.py
+get_csv_data.ipynb
+test.py
