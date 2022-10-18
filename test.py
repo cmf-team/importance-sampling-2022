@@ -11,8 +11,9 @@ def test_stocks_returns():
         data=[-0.0136, -0.0082, 0.0093], 
         index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
     )
-    print('difference is ', (returns.values - test_returns.values).round(4)
-    assert np.allclose(returns, test_returns, atol=0.0001)
+    print('difference is ', (returns.values - test_returns.values).round(4))
+    ## allocation will be passed if atol = 0.0002
+    assert np.allclose(returns, test_returns, atol=0.0001) 
     
     assets = ['AAPL', 'GOOGL']
     weights = [0.3, 0.7]
@@ -21,5 +22,6 @@ def test_stocks_returns():
         data=[-0.0158, -0.0091, 0.0188], 
         index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
     )
-    print('difference is ', (returns.values - test_returns.values).round(4)
+    print('difference is ', (returns.values - test_returns.values).round(4))
+    ## allocation will be passed if atol = 0.0008
     assert np.allclose(returns, test_returns, atol=0.0001)
