@@ -46,8 +46,8 @@ def commodities_returns(assets, weights, from_date, to_date):
     weights = np.array(weights)
     weights /= sum(weights)
     try:
-        to_date = dt.strftime(dt.strptime(to_date, '%d/%m/%Y'), '%Y-%m-%d')
-        from_date = dt.strftime(dt.strptime(from_date, '%d/%m/%Y'), '%Y-%m-%d')
+        to_date = dt.strftime(dt.strptime(to_date, '%m/%d/%Y'), '%Y-%m-%d')
+        from_date = dt.strftime(dt.strptime(from_date, '%m/%d/%Y'), '%Y-%m-%d')
     except:
         raise ValueError("Dates format do not match format '%d/%m/%Y'")
     portfolio = yf.download(assets, dt.strftime(dt.strptime(from_date,
@@ -75,8 +75,8 @@ def cryptocurrencies_returns(assets, weights, from_date, to_date):
     weights = np.array(weights)
     weights /= sum(weights)
     try:
-        to_date = dt.strftime(dt.strptime(to_date, '%d/%m/%Y'), '%Y-%m-%d')
-        from_date = dt.strftime(dt.strptime(from_date, '%d/%m/%Y'), '%Y-%m-%d')
+        to_date = dt.strftime(dt.strptime(to_date, '%m/%d/%Y'), '%Y-%m-%d')
+        from_date = dt.strftime(dt.strptime(from_date, '%m/%d/%Y'), '%Y-%m-%d')
     except:
         raise ValueError("Dates format do not match format '%d/%m/%Y'")
     portfolio = yf.download(assets, dt.strftime(dt.strptime(from_date,
