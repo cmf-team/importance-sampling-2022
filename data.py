@@ -3,7 +3,7 @@ import datetime as dt
 import numpy as np
 import investiny as inv
 
-def get_yield(assets, weights, from_date, to_date, **exchange):
+def get_price(assets, weights, from_date, to_date, **exchange):
     returns = pd.DataFrame()
     from_date = (dt.datetime.strptime(from_date, '%m/%d/%Y')-dt.timedelta(days=1)).strftime('%m/%d/%Y')
     to_date= (dt.datetime.strptime(to_date, '%m/%d/%Y')+dt.timedelta(days=1)).strftime('%m/%d/%Y')
