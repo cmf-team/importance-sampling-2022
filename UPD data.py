@@ -56,7 +56,7 @@ def stocks_returns(assets: list[str], weights: list[float], from_date: str, to_d
     
     if np.setdiff1d(assets, available_stocks).size >= 1:
         print('Error. Make sure that tickers entered are in the tickers list:')
-        print(available_tickers)
+        print(available_stocks)
         
     if len(assets) != len(weights):
         print('Error. Number of assets is not equal to number of weights')
@@ -89,7 +89,7 @@ def cryptocurrencies_returns(assets: list[str], weights: list[float], from_date:
     
     if np.setdiff1d(assets, available_crypto).size >= 1:
         print('Error. Make sure that tickers entered are in the tickers list:')
-        print(available_tickers)
+        print(available_crypto)
         
     if len(assets) != len(weights):
         print('Error. Number of assets is not equal to number of weights')
