@@ -57,4 +57,3 @@ def test_cryptocurrencies_returns():
     )
     assert np.allclose(returns, test_returns, atol=0.01)
 
-test_commodities_returns()
