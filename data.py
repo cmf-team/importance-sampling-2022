@@ -46,7 +46,9 @@ def get_returns(asset_type: str, assets: List[str], weights: List[float],
 
     :param asset_type: one of 'stocks', 'commodities', 'crypto'.
     :param assets: list of assets. Possible asset names correspond to the names of
-        csv files (without the extension) downloaded by this function.
+        csv files (without the extension) downloaded by this function. If you don't
+        know the possible asset names, you can first download historical data using
+        the function `download_data()`.
     :param weights: list of weights for corresponding asset
     :param from_date: beginning of the period in the format MM/DD/YYYY.
         Must be greater or equal to 01/02/2020.
