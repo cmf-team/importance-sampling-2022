@@ -36,10 +36,9 @@ def stocks_returns(assets, weights, from_date, to_date):
     return portfolio['return']
 
 def commodities_returns(assets, weights, from_date, to_date):
-    dict = {'BZ=F': 'Brent Oil Futures', 'CL=F': 'Crude Oil WTI Futures', 'NG=F': 'Natural Gas Futures',
-     'HO=F': 'Heating Oil Futures',
-     'GC=F': 'Gold Futures', 'SI=F': 'Silver Futures', 'HG=F': 'Copper Futures', 'PL=F': 'Platinum Futures',
-     'KC=F': 'US Coffee C Futures', 'ZC=F': 'US Corn Futures'}
+    dict = {'Brent Oil':'BZ=F', 'Crude Oil WTI':'CL=F', 'Natural Gas':'NG=F',
+            'Heating Oil':'HO=F', 'Gold':'GC=F', 'Silver':'SI=F', 'Copper':'HG=F',
+            'Platinum':'PL=F', 'US Coffee C':'KC=F', 'US Corn':'ZC=F'}
     assets = [dict[asset] for asset in assets]
     if len(assets) != len(weights):
         raise ValueError("Length of weights does not match number of assets")
