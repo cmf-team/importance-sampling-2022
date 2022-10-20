@@ -1,74 +1,64 @@
 import pandas as pd
 import numpy as np
-from investiny import historical_data, search_assets
-from datetime import timedelta, date, datetime
+import gdown
+from datetime import datetime, timedelta
 
 
-def make_date(date, days_count):
+def prev_date(date):
     to_date_tmp = datetime.strptime(date, '%m/%d/%Y')
-    to_date_tmp = to_date_tmp + timedelta(days=days_count)
+    to_date_tmp = to_date_tmp + timedelta(days=-1)
     date = to_date_tmp.strftime('%m/%d/%Y')
     return date
 
 
-def make_profit(data, weights):
-    res = []
-    for i in range(1, len(data[0]['close'])):
-        sum_tek = 0
-        sum_tom = 0
-        r = 0
-        for j in range(len(data)):
-            sum_tek = sum_tek + data[j]['close'][i] * weights[j]
-            sum_tom = sum_tom + data[j]['close'][i-1] * weights[j]
+def get_portfolio(prices, assets, weights, from_date_new, to_date):
+    prices.index = pd.to_datetime(prices.index)
+    prices_assets = prices.loc[from_date_new:to_date, assets]
+    i = 0
+    for column in prices_assets:
+        prices_assets.loc[:, column] = prices_assets[column] * weights[i]
+        i += 1
+    prices_assets['price'] = prices_assets.loc[:, :].sum(axis=1)
+    return prices_assets
 
-        r = (sum_tek - sum_tom)/sum_tom
-        res.append(r)
 
-    res_ser = pd.Series(data=res, index=data[0]['date'][1:])
-    return res_ser
+def get_returns(portfolio, from_date_new):
+    returns = []
+    for i in range(1, len(portfolio)):
+        day_return = (portfolio['price'][i] - portfolio['price'][i - 1]) / portfolio['price'][i - 1]
+        returns.append(day_return)
+    portfolio = portfolio.drop(index=[from_date_new])
+    portfolio['return'] = returns
+    return portfolio['return']
 
 
 def stocks_returns(assets, weights, from_date, to_date):
-    from_date = make_date(from_date, -1)
-    to_date = make_date(to_date, 1)
-
-    data = []
-    for name in assets:
-        results = search_assets(query=name, limit=1, type="Stock",
-                                exchange="NASDAQ")
-
-        investing_id = int(results[0]["ticker"])
-        data.append(historical_data(investing_id=investing_id, from_date=from_date, to_date=to_date))
-
-    res_ser = make_profit(data, weights)
-    return res_ser
+    url = 'https://drive.google.com/file/d/1GnXJN5m3UvBoSnlS-MH3HEQvNnNDlIkl/view?usp=sharing'
+    gdown.download(url, 'stock_prices.csv', fuzzy=True)
+    stock_prices = pd.read_csv('stock_prices.csv', index_col='Date')
+    from_date_new = prev_date(from_date)
+    portfolio = get_portfolio(stock_prices, assets, weights, from_date_new, to_date)
+    stocks_returns = get_returns(portfolio, from_date_new)
+    return stocks_returns
 
 
 def commodities_returns(assets, weights, from_date, to_date):
-    from_date = make_date(from_date, -1)
-    to_date = make_date(to_date, 1)
-
-    data = []
-    for name in assets:
-        results = search_assets(query=name, limit=1, type="Commodity")
-
-        investing_id = int(results[0]["ticker"])
-        data.append(historical_data(investing_id=investing_id, from_date=from_date, to_date=to_date))
-
-    res_ser = make_profit(data, weights)
-    return res_ser
+    url = 'https://drive.google.com/file/d/1LBKJyk95z46gB9nl4_0sYS3b4bYMmIQ4/view?usp=sharing'
+    gdown.download(url, 'commodities_prices.csv', fuzzy=True)
+    commodities_prices = pd.read_csv('commodities_prices.csv', index_col='Date')
+    from_date_new = prev_date(from_date)
+    portfolio = get_portfolio(commodities_prices, assets, weights, from_date_new, to_date)
+    commodities_returns = get_returns(portfolio, from_date_new)
+    return commodities_returns
 
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    from_date = make_date(from_date, -1)
-    to_date = make_date(to_date, 1)
+    url = 'https://drive.google.com/file/d/1NLvOCVyvUkVwYBeLL7DjRKlWzQvHh46z/view?usp=sharing'
+    gdown.download(url, 'crypto_prices.csv', fuzzy=True)
+    crypto_prices = pd.read_csv('crypto_prices.csv', index_col='Date')
+    from_date_new = prev_date(from_date)
+    portfolio = get_portfolio(crypto_prices, assets, weights, from_date_new, to_date)
+    cryptocurrencies_returns = get_returns(portfolio, from_date_new)
+    return cryptocurrencies_returns
 
-    data = []
-    for name in assets:
-        results = search_assets(query=name, limit=1)
-
-        investing_id = int(results[0]["ticker"])
-        data.append(historical_data(investing_id=investing_id, from_date=from_date, to_date=to_date))
-    res_ser = make_profit(data, weights)
-    return res_ser
 
