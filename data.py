@@ -40,7 +40,7 @@ def stocks_returns(assets, weights, from_date, to_date):
 
 def commodities_returns(assets, weights, from_date, to_date):
 #commodities_returns downloads data and applies portfolio function.
-  url = 'https://drive.google.com/file/d/1qnP2Ft1OgChPirHBpDrG6f--PDmm0jLY/view?usp=sharing'
+  url = 'https://drive.google.com/file/d/1ZlGW41Zcc5uWbmRVSelcDsZLf4y49L6M/view?usp=sharing'
   gdown.download(url, 'commodities_prices.csv', fuzzy=True)
   commodities_prices = pd.read_csv('commodities_prices.csv', index_col='date')
   commodities_returns = portfolio(commodities_prices, assets, weights, from_date, to_date)
