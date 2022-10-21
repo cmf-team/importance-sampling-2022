@@ -1,0 +1,10 @@
+**/.idea
+**/.ipynb_checkpoints
+.pytest_cache
+__pycache__
+
+/historical_data
+/historical_data.zip
+
+# Task 1
+get_csv_data.ipynb

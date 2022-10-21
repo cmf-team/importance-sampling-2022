@@ -47,11 +47,11 @@ def test_commodities_returns():
 
 def test_cryptocurrencies_returns():
 
-    assets = ['ADA', 'BNB', 'BTC', 'BUSD', 'DOGE', 'ETH', 'SOL', 'USDC', 'USDT', 'XRP']
-    weights = np.ones(10)
+    assets = ['ADA', 'BNB', 'BTC', 'BUSD', 'DOGE', 'ETH', 'USDC', 'USDT', 'XRP']
+    weights = np.ones(9)
     returns = cryptocurrencies_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
     test_returns = pd.Series(
-        data=[-0.0079, -0.0073,  0.0088, -0.008 , -0.0494,  0.0276],
+        data=[-0.0076, -0.0072,  0.0081, -0.0063, -0.0481,  0.026 ],
         index=pd.to_datetime(['2022-09-02', '2022-09-03', '2022-09-04', '2022-09-05', '2022-09-06', '2022-09-07']),
     )
     assert np.allclose(returns, test_returns, atol=0.0001)
