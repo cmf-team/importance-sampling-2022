@@ -1,4 +1,4 @@
 pandas
 numpy
+gdown==4.2.0
 datetime
-investiny==0.4.0
