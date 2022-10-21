@@ -8,9 +8,14 @@ import gdown
 url_shares = 'https://drive.google.com/file/d/1wGqjII5tLSqoFzQ8rhNAw3YU1n02gD4t/view?usp=sharing'
 url_commodities = 'https://drive.google.com/file/d/1wJ3plFuTWQbEnF3VYU0C5EC4t3Wa09Ku/view?usp=sharing'
 url_crypto = 'https://drive.google.com/file/d/1wDvDU0e0as6zTnTzWXMHW2B60ixpE685/view?usp=sharing'
-URLS = {'shares': url_shares,
-        'commodities': url_commodities,
-        'crypto': url_crypto}
+
+url_shares_common = 'https://drive.google.com/file/d/1lLQV4oc30mo1_m39p4JXlpd1gV6pLw6A/view?usp=sharing'
+url_commodities_common = 'https://drive.google.com/file/d/1GFq1jcV00BjFEa7hmZSO1xD7K4j4gv3O/view?usp=sharing'
+url_crypto_common = 'https://drive.google.com/file/d/1mPP5Vb57Jc2mYPeLYZPgAJM8ogjiguSO/view?usp=sharing'
+
+URLS = {'shares': url_shares_common,
+        'commodities': url_commodities_common,
+        'crypto': url_crypto_common}
 
 
 def load_data(type):
