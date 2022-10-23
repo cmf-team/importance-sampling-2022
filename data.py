@@ -1,133 +1,39 @@
-# Я сначала не понял что надо делать, поэтому подсмотрел у того, кто
-# сделал первым. У него взял идею и реализовал своим способом
-
+import gdown
 import pandas as pd
-from investiny import historical_data, search_assets
+from datetime import datetime, timedelta
 
 def stocks_returns(assets, weights, from_date, to_date):
-    '''
+    url = 'https://drive.google.com/file/d/1wlHowk6HPpwt4DJqAXJL7hODc1Sjf_GG/view?usp=sharing'
+    gdown.download(url, 'shares.csv', fuzzy=True)
+    prices = pd.read_csv('shares.csv', index_col = 'Date')
+    return computing_r(assets, weights, from_date, to_date, prices)
     
-
-    Parameters
-    ----------
-    assets : TYPE
-        список инструментов в виде массива названий.
-    weights : TYPE
-         список весов для каждого инструмента.
-    from_date : TYPE
-        дата начала периода в формате месяц/день/год.
-    to_date : TYPE
-        дата окончания периода.
-
-    Returns
-    -------
-    res : TYPE
-        функция возвращает список доходностей портфеля
-        на каждый день выбранного периода (включая
-        последний день) в формате pandas Series. 
-        Индекс – дата, значение – доходность.
-
-    '''
-    
-    Pr = []
-    for i in assets:
-        g = search_assets(query=str(i), limit = 1,
-                          type="Stock", exchange = "NASDAQ")
-        gg = g[0]['ticker']
-        Pr.append(historical_data(investing_id=int(gg),
-                               from_date=from_date,
-                               to_date = to_date))
-    res = computing_r(Pr, weights)
-    return res
-    
-    
-# я не понял что писать в exchange, поэтому просто что-то написал
-# вдруг сработает :)
 def commodities_returns(assets, weights, from_date, to_date):
-    '''
-    
-
-    Parameters
-    ----------
-    assets : TYPE
-        список инструментов в виде массива названий.
-    weights : TYPE
-         список весов для каждого инструмента.
-    from_date : TYPE
-        дата начала периода в формате месяц/день/год.
-    to_date : TYPE
-        дата окончания периода.
-
-    Returns
-    -------
-    res : TYPE
-        функция возвращает список доходностей портфеля
-        на каждый день выбранного периода (включая
-        последний день) в формате pandas Series. 
-        Индекс – дата, значение – доходность.
-
-    '''
-    
-    Pr = []
-    for i in assets:
-        g = search_assets(query=str(i), limit = 1,
-                          type="Stock", exchange = "Capital")
-        gg = g[0]['ticker']
-        Pr.append(historical_data(investing_id=int(gg),
-                               from_date=from_date,
-                               to_date = to_date))
-    res = computing_r(Pr, weights)
-    return res
-    
+    url = 'https://drive.google.com/file/d/1m63lYpYlCtbTTyk21fYw_pyuHGL-vS-Q/view?usp=sharing'
+    gdown.download(url, 'commodities.csv', fuzzy=True)
+    prices = pd.read_csv('commodities.csv', index_col= 'Date')
+    return computing_r(assets, weights, from_date, to_date, prices)
     
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    '''
+    url = 'https://drive.google.com/file/d/1dr4jKLiACtgcWzM4u4ZkNuQz_kwG03Mf/view?usp=sharing'
+    gdown.download(url, 'crypto.csv', fuzzy=True)
+    prices = pd.read_csv('crypto.csv', index_col= 'Date')
+    return computing_r(assets, weights, from_date, to_date, prices)
     
-
-    Parameters
-    ----------
-    assets : TYPE
-        список инструментов в виде массива названий.
-    weights : TYPE
-         список весов для каждого инструмента.
-    from_date : TYPE
-        дата начала периода в формате месяц/день/год.
-    to_date : TYPE
-        дата окончания периода.
-
-    Returns
-    -------
-    res : TYPE
-        функция возвращает список доходностей портфеля
-        на каждый день выбранного периода (включая
-        последний день) в формате pandas Series. 
-        Индекс – дата, значение – доходность.
-
-    '''
-    
-    Pr = []
-    for i in assets:
-        g = search_assets(query=str(i), limit = 1,
-                          type="Stock", exchange = "BINANCE")
-        gg = g[0]['ticker']
-        Pr.append(historical_data(investing_id=int(gg),
-                               from_date=from_date, 
-                               to_date = to_date))
-    res = computing_r(Pr, weights)
-    return res
-    
-def computing_r(Pr, weights):
-    res = []
+def computing_r(assets, weights, from_date, to_date, prices):
+    from_date = datetime.strftime((datetime.strptime(from_date, '%m/%d/%Y') - timedelta(days = 1)), '%Y-%m-%d')
+    to_date = datetime.strftime(datetime.strptime(to_date, '%m/%d/%Y'), '%Y-%m-%d')
+    prices = prices[from_date: to_date]
+    prices = prices[assets]
+    answer = []
     i = 0
-    while i < (len(Pr)):
-        wres = [0]
-        j = 1
-        while j < (len(Pr[i]['date'])):
-            wres.append(weights[i] * ((Pr[i]['close'][j] - Pr[i]['close'][j-1]))/(Pr[i]['close'][j-1]))
-            j+=1
-        i+=1
-    res = pd.Series(wres, index = Pr[0]['date'])
-    return res
-
-
-    
+    for column in prices:
+        prices.loc[:, column] = prices[column] * weights[i]
+        i += 1
+    prices['summ'] = prices.loc[:,:].sum(axis=1)
+    for i in range(1, len(prices)):
+        day_answer = (prices['summ'][i] - prices['summ'][i-1]) / prices['summ'][i-1]
+        answer.append(day_answer)
+    prices = prices.drop(index=[from_date])
+    prices['return'] = answer
+    return prices['return']
