@@ -6,8 +6,6 @@ from data import (
     cryptocurrencies_returns, 
     Dataloader
 )
-from metrics import pof_test, if_test, quantile_loss
-from models import HistoricalSimulation, RiskMetrics
 
 class TestData:
     def test_stocks_returns(self):
@@ -62,65 +60,3 @@ class TestData:
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
 
-
-class TestMetrics:
-    def test_quantile_loss(self):
-        np.random.seed(0)
-        target = np.random.randn(10)
-        var = np.ones(10)
-        assert np.isclose(quantile_loss(var, target, alpha=0.9), 1.0461, atol=0.0001)
-        assert np.isclose(quantile_loss(var, target, alpha=0.1), 0.6269, atol=0.0001)
-
-    def test_pof_test(self):
-        np.random.seed(0)
-        target = np.random.randn(10)
-        var = -np.ones(10) * 2
-        assert np.isclose(pof_test(var, target, alpha=0.95), 0.3111, atol=0.0001)
-
-    def test_if_test(self):
-        np.random.seed(0)
-        target = np.random.randn(1000)
-        var = -np.ones(1000) * 2
-        assert np.isclose(if_test(var, target), 0.2770, atol=0.0001)
-
-
-class TestModels:
-    def setup_class(self):
-        assets = ['AAPL', 'GOOGL']
-        weights = [0.3, 0.7]
-        returns = stocks_returns(assets, weights, from_date='09/02/2020', to_date='09/02/2022')
-        logreturns = np.log(returns + 1)
-        self.loader =  Dataloader(
-            series=logreturns,
-            window_size=125, # a half of trading year
-            step_size=1,
-            horizon=1,
-            first_pred=125+1
-        )
-
-    def test_historical_simulation(self):
-        alpha = 0.95
-        hs = HistoricalSimulation(alpha, window_size=125)
-        var = []
-        target = []
-        for feat, _target in self.loader:
-            var.append(hs.forecast(feat))
-            target.append(_target)
-        var = np.array(var)
-        target = np.array(target)
-        assert np.isclose(quantile_loss(var, target, alpha), 0.0038, atol=0.0001)
-        assert if_test(var, target) > 0.05
-    
-    def test_riskmetrics(self):
-        alpha = 0.95
-        rm = RiskMetrics(alpha)
-        var = []
-        target = []
-        for feat, _target in self.loader:
-            var.append(rm.forecast(feat))
-            target.append(_target)
-        var = np.array(var)
-        target = np.array(target)
-        assert np.isclose(quantile_loss(var, target, alpha), 0.0036, atol=0.0001)
-        assert pof_test(var, target, alpha) > 0.05
-        assert if_test(var, target) > 0.05
