@@ -1,4 +1,4 @@
 pandas
 numpy
-investiny
-datetime
+scipy
+arch
