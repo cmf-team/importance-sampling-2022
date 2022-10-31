@@ -1,64 +1,66 @@
 import numpy as np
 import pandas as pd
-from data import (
-    stocks_returns, 
-    commodities_returns, 
-    cryptocurrencies_returns, 
-    Dataloader
-)
+from data import stocks_returns, commodities_returns, cryptocurrencies_returns, Dataloader
 from metrics import pof_test, if_test, quantile_loss
 from models import HistoricalSimulation, RiskMetrics
 
+
 class TestData:
     def test_stocks_returns(self):
-        assets = ['AAPL']
-        weights = [1.]
-        returns = stocks_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        assets = ["AAPL"]
+        weights = [1.0]
+        returns = stocks_returns(assets, weights, from_date="09/02/2022", to_date="09/07/2022")
         test_returns = pd.Series(
-            data=[-0.0136, -0.0082, 0.0093], 
-            index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
-        )
-        assert np.allclose(returns, test_returns, atol=0.0001)
-    
-        assets = ['AAPL', 'GOOGL']
-        weights = [0.3, 0.7]
-        returns = stocks_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
-        test_returns = pd.Series(
-            data=[-0.0158, -0.0091, 0.0188], 
-            index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
+            data=[-0.0136, -0.0082, 0.0093],
+            index=pd.to_datetime(["09/02/2022", "09/06/2022", "09/07/2022"]),
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
 
-        assets = ['AAPL', 'AMD', 'AMZN', 'GOOGL', 'INTC', 'META', 'MSFT', 'MU', 'NVDA', 'TSLA']
-        weights = np.ones(10)
-        returns = stocks_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        assets = ["AAPL", "GOOGL"]
+        weights = [0.3, 0.7]
+        returns = stocks_returns(assets, weights, from_date="09/02/2022", to_date="09/07/2022")
         test_returns = pd.Series(
-            data=[-0.0193, -0.0068,  0.0196],
-            index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
+            data=[-0.0158, -0.0091, 0.0188],
+            index=pd.to_datetime(["09/02/2022", "09/06/2022", "09/07/2022"]),
+        )
+        assert np.allclose(returns, test_returns, atol=0.0001)
+
+        assets = ["AAPL", "AMD", "AMZN", "GOOGL", "INTC", "META", "MSFT", "MU", "NVDA", "TSLA"]
+        weights = np.ones(10)
+        returns = stocks_returns(assets, weights, from_date="09/02/2022", to_date="09/07/2022")
+        test_returns = pd.Series(
+            data=[-0.0193, -0.0068, 0.0196],
+            index=pd.to_datetime(["09/02/2022", "09/06/2022", "09/07/2022"]),
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
 
     def test_commodities_returns(self):
         assets = [
-            'Brent Oil', 'Crude Oil WTI', 'Natural Gas',
-            'Heating Oil', 'Gold', 'Silver', 'Copper', 
-            'US Coffee C', 'US Corn'
+            "Brent Oil",
+            "Crude Oil WTI",
+            "Natural Gas",
+            "Heating Oil",
+            "Gold",
+            "Silver",
+            "Copper",
+            "US Coffee C",
+            "US Corn",
         ]
         weights = np.ones(9)
-        returns = commodities_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        returns = commodities_returns(assets, weights, from_date="09/02/2022", to_date="09/07/2022")
         test_returns = pd.Series(
-            data=[ 0.0075,  0.001 , -0.0021],
-            index=pd.to_datetime(['2022-09-02', '2022-09-06', '2022-09-07']),
+            data=[0.0075, 0.001, -0.0021],
+            index=pd.to_datetime(["2022-09-02", "2022-09-06", "2022-09-07"]),
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
 
     def test_cryptocurrencies_returns(self):
-        assets = ['ADA', 'BNB', 'BTC', 'BUSD', 'DOGE', 'ETH', 'USDC', 'USDT', 'XRP']
+        assets = ["ADA", "BNB", "BTC", "BUSD", "DOGE", "ETH", "USDC", "USDT", "XRP"]
         weights = np.ones(9)
-        returns = cryptocurrencies_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        returns = cryptocurrencies_returns(assets, weights, from_date="09/02/2022", to_date="09/07/2022")
         test_returns = pd.Series(
-            data=[-0.0076, -0.0072,  0.0081, -0.0063, -0.0481,  0.026 ],
-            index=pd.to_datetime(['2022-09-02', '2022-09-03', '2022-09-04', '2022-09-05', '2022-09-06', '2022-09-07']),
+            data=[-0.0076, -0.0072, 0.0081, -0.0063, -0.0481, 0.026],
+            index=pd.to_datetime(["2022-09-02", "2022-09-03", "2022-09-04", "2022-09-05", "2022-09-06", "2022-09-07"]),
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
 
@@ -86,16 +88,12 @@ class TestMetrics:
 
 class TestModels:
     def setup_class(self):
-        assets = ['AAPL', 'GOOGL']
+        assets = ["AAPL", "GOOGL"]
         weights = [0.3, 0.7]
-        returns = stocks_returns(assets, weights, from_date='09/02/2020', to_date='09/02/2022')
+        returns = stocks_returns(assets, weights, from_date="09/02/2020", to_date="09/02/2022")
         logreturns = np.log(returns + 1)
-        self.loader =  Dataloader(
-            series=logreturns,
-            window_size=125, # a half of trading year
-            step_size=1,
-            horizon=1,
-            first_pred=125+1
+        self.loader = Dataloader(
+            series=logreturns, window_size=125, step_size=1, horizon=1, first_pred=125 + 1  # a half of trading year
         )
 
     def test_historical_simulation(self):
@@ -110,7 +108,7 @@ class TestModels:
         target = np.array(target)
         assert np.isclose(quantile_loss(var, target, alpha), 0.0038, atol=0.0001)
         assert if_test(var, target) > 0.05
-    
+
     def test_riskmetrics(self):
         alpha = 0.95
         rm = RiskMetrics(alpha)

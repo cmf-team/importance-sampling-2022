@@ -1,0 +1,10 @@
+.DS_Store
+
+.ipynb_checkpoints
+env
+
+commodities.csv
+cryptocurrencies.csv
+stocks.csv
+
+__pycache__
