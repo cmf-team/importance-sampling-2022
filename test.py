@@ -87,9 +87,6 @@ class TestMetrics:
 
 
 class TestModels:
-    def __init__(self):
-        self.setup_class()
-
     def setup_class(self):
         assets = ["AAPL", "GOOGL"]
         weights = [0.3, 0.7]
@@ -125,23 +122,3 @@ class TestModels:
         assert np.isclose(quantile_loss(var, target, alpha), 0.0036, atol=0.0001)
         assert pof_test(var, target, alpha) > 0.05
         assert if_test(var, target) > 0.05
-
-
-# adding this to run the tests
-if __name__ == "__main__":
-    print("--- TESTING DATA ---")
-    t = TestData()
-    t.test_commodities_returns()
-    t.test_cryptocurrencies_returns()
-    t.test_stocks_returns()
-
-    print("--- TESTING METRICS ---")
-    t = TestMetrics()
-    t.test_quantile_loss()
-    t.test_pof_test()
-    t.test_if_test()
-
-    print("--- TESTING MODELS ---")
-    t = TestModels()
-    t.test_historical_simulation()
-    t.test_riskmetrics()
