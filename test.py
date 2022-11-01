@@ -124,3 +124,5 @@ class TestModels:
         assert np.isclose(quantile_loss(var, target, alpha), 0.0036, atol=0.0001)
         assert pof_test(var, target, alpha) > 0.05
         assert if_test(var, target) > 0.05
+        
+        
