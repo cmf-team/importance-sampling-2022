@@ -1,133 +1,71 @@
-# Я сначала не понял что надо делать, поэтому подсмотрел у того, кто
-# сделал первым. У него взял идею и реализовал своим способом
-
 import pandas as pd
-from investiny import historical_data, search_assets
+import numpy as np
+import gdown
+
+class Dataloader:
+    def __init__(
+            self,
+            series: pd.Series,
+            window_size: int,
+            step_size: int,
+            horizon: int,
+            first_pred: int
+    ):
+        self.series = series
+        self.window_size = window_size
+        self.step_size = step_size
+        self.horizon = horizon
+        self.first_pred = first_pred
+        assert self.first_pred > self.window_size
+        feat_idx = []
+        target_idx = []
+        for i in range(self.first_pred, self.series.shape[0], self.step_size):
+            feat_idx.append(range(i - self.horizon - self.window_size, i - self.horizon))
+            target_idx.append(i)
+        self.feat_idx = feat_idx
+        self.target_idx = target_idx
+
+    def __len__(self):
+        return len(self.feat_idx)
+
+    def __iter__(self):
+        self.iter = 0
+        return self
+
+    def __next__(self):
+        if self.iter < len(self.feat_idx):
+            feat = self.series.iloc[self.feat_idx[self.iter]]
+            target = self.series.iloc[self.target_idx[self.iter]]
+            self.iter += 1
+            return feat, target
+        else:
+            raise StopIteration
+
+
+def _get_returns(data, assets, weights, from_date, to_date):
+    data.index = pd.to_datetime(data.index)
+    portfolio = (data[assets] * weights).sum(axis=1)
+    from_mask = portfolio.index >= pd.to_datetime(from_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
+    return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
+
 
 def stocks_returns(assets, weights, from_date, to_date):
-    '''
-    
+    url = 'https://drive.google.com/file/d/1lLQV4oc30mo1_m39p4JXlpd1gV6pLw6A/view?usp=sharing'
+    gdown.download(url, 'stocks.csv', fuzzy=True)
+    data = pd.read_csv('stocks.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
 
-    Parameters
-    ----------
-    assets : TYPE
-        список инструментов в виде массива названий.
-    weights : TYPE
-         список весов для каждого инструмента.
-    from_date : TYPE
-        дата начала периода в формате месяц/день/год.
-    to_date : TYPE
-        дата окончания периода.
 
-    Returns
-    -------
-    res : TYPE
-        функция возвращает список доходностей портфеля
-        на каждый день выбранного периода (включая
-        последний день) в формате pandas Series. 
-        Индекс – дата, значение – доходность.
-
-    '''
-    
-    Pr = []
-    for i in assets:
-        g = search_assets(query=str(i), limit = 1,
-                          type="Stock", exchange = "NASDAQ")
-        gg = g[0]['ticker']
-        Pr.append(historical_data(investing_id=int(gg),
-                               from_date=from_date,
-                               to_date = to_date))
-    res = computing_r(Pr, weights)
-    return res
-    
-    
-# я не понял что писать в exchange, поэтому просто что-то написал
-# вдруг сработает :)
 def commodities_returns(assets, weights, from_date, to_date):
-    '''
-    
+    url = 'https://drive.google.com/file/d/1GFq1jcV00BjFEa7hmZSO1xD7K4j4gv3O/view?usp=sharing'
+    gdown.download(url, 'commodities.csv', fuzzy=True)
+    data = pd.read_csv('commodities.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
 
-    Parameters
-    ----------
-    assets : TYPE
-        список инструментов в виде массива названий.
-    weights : TYPE
-         список весов для каждого инструмента.
-    from_date : TYPE
-        дата начала периода в формате месяц/день/год.
-    to_date : TYPE
-        дата окончания периода.
 
-    Returns
-    -------
-    res : TYPE
-        функция возвращает список доходностей портфеля
-        на каждый день выбранного периода (включая
-        последний день) в формате pandas Series. 
-        Индекс – дата, значение – доходность.
-
-    '''
-    
-    Pr = []
-    for i in assets:
-        g = search_assets(query=str(i), limit = 1,
-                          type="Stock", exchange = "Capital")
-        gg = g[0]['ticker']
-        Pr.append(historical_data(investing_id=int(gg),
-                               from_date=from_date,
-                               to_date = to_date))
-    res = computing_r(Pr, weights)
-    return res
-    
-    
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    '''
-    
-
-    Parameters
-    ----------
-    assets : TYPE
-        список инструментов в виде массива названий.
-    weights : TYPE
-         список весов для каждого инструмента.
-    from_date : TYPE
-        дата начала периода в формате месяц/день/год.
-    to_date : TYPE
-        дата окончания периода.
-
-    Returns
-    -------
-    res : TYPE
-        функция возвращает список доходностей портфеля
-        на каждый день выбранного периода (включая
-        последний день) в формате pandas Series. 
-        Индекс – дата, значение – доходность.
-
-    '''
-    
-    Pr = []
-    for i in assets:
-        g = search_assets(query=str(i), limit = 1,
-                          type="Stock", exchange = "BINANCE")
-        gg = g[0]['ticker']
-        Pr.append(historical_data(investing_id=int(gg),
-                               from_date=from_date, 
-                               to_date = to_date))
-    res = computing_r(Pr, weights)
-    return res
-    
-def computing_r(Pr, weights):
-    res = []
-    i = 0
-    while i < (len(Pr)):
-        wres = [0]
-        j = 1
-        while j < (len(Pr[i]['date'])):
-            wres.append(weights[i] * ((Pr[i]['close'][j] - Pr[i]['close'][j-1]))/(Pr[i]['close'][j-1]))
-            j+=1
-        i+=1
-    res = pd.Series(wres, index = Pr[0]['date'])
-    return res
-
-
-    
+    url = 'https://drive.google.com/file/d/1mPP5Vb57Jc2mYPeLYZPgAJM8ogjiguSO/view?usp=sharing'
+    gdown.download(url, 'cryptocurrencies.csv', fuzzy=True)
+    data = pd.read_csv('cryptocurrencies.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
