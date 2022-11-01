@@ -11,7 +11,7 @@ def pof_test(var, target, alpha=0.99):
     t = (1-N/T)**(T-N)*(N/T)**N
     c = ((alpha)**(T-N))*((1-alpha)**N)
     LR_POF = 2*np.log(t)-2*np.log(c)
-    res = stats.chi2.pdf(LR_POF, 1)
+    res = 1 - stats.chi2.cdf(LR_POF, df=1)
     return res
 
 
@@ -40,7 +40,7 @@ def if_test(var, target):
     Numeritor = ((1 - pi) ** (n00 + n10)) * (pi ** (n01 + n11))
     Denominator = ((1 - pi0) ** (n00)) * (pi0 ** n01) * ((1 - pi1) ** (n10)) * (pi1 ** n11)
     LR_CCI = -2 * np.log(Numeritor / Denominator)
-    return stats.chi2.pdf(LR_CCI, 1)
+    return 1 - stats.chi2.cdf(LR_CCI, df=1)
 
 
 
