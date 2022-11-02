@@ -1,4 +1,6 @@
+os
 pandas
 numpy
 scipy
 arch
+gdown
