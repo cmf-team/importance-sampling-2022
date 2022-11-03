@@ -2,3 +2,5 @@ pandas
 numpy
 gdown==4.2.0
 datetime
+scipy
+arch
