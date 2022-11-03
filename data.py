@@ -1,74 +1,72 @@
-"""
-@author: Maria Zykova
-"""
-
-import investiny
 import pandas as pd
 import numpy as np
-from datetime import timedelta, datetime
+import gdown
 
-#date shift by any number of days - it is necessary that the results take into account the entire specified period
-def change_date(date, days_count):
-    to_date_tmp = datetime.strptime(date, '%m/%d/%Y')
-    to_date_tmp = to_date_tmp + timedelta(days=days_count)
-    date = to_date_tmp.strftime('%m/%d/%Y')
-    return date
+class Dataloader:
+    def __init__(
+            self,
+            series: pd.Series,
+            window_size: int,
+            step_size: int,
+            horizon: int,
+            first_pred: int
+    ):
+        self.series = series
+        self.window_size = window_size
+        self.step_size = step_size
+        self.horizon = horizon
+        self.first_pred = first_pred
+        assert self.first_pred > self.window_size
+        feat_idx = []
+        target_idx = []
+        for i in range(self.first_pred, self.series.shape[0], self.step_size):
+            feat_idx.append(range(i - self.horizon - self.window_size, i - self.horizon))
+            target_idx.append(i)
+        self.feat_idx = feat_idx
+        self.target_idx = target_idx
 
+    def __len__(self):
+        return len(self.feat_idx)
 
-#the process for history data
-def get_lst_assets(assets, from_date, to_date, types = "False", exchange = "False"):
-    lst= []
-    for name in assets:
-        if types == "False":
-            results = investiny.search_assets(query=name, limit=1)
+    def __iter__(self):
+        self.iter = 0
+        return self
+
+    def __next__(self):
+        if self.iter < len(self.feat_idx):
+            feat = self.series.iloc[self.feat_idx[self.iter]]
+            target = self.series.iloc[self.target_idx[self.iter]]
+            self.iter += 1
+            return feat, target
         else:
-            if exchange != "False":
-                results = investiny.search_assets(query=name, limit=1, type=types, exchange="NASDAQ")
-            else:
-                results = investiny.search_assets(query=name, limit=1, type=types)
-
-        investing_id = int(results[0]["ticker"])
-        data = investiny.historical_data(investing_id=investing_id, from_date=from_date, to_date=to_date)
-        lst_date = data['date']
-        lst.append(data['close'])
-    
-    return pd.DataFrame(data = np.array(lst), columns = lst_date)
+            raise StopIteration
 
 
-#creating a portfolio
-def profit(data, weights):
-    #multiplication of data with weights and addition
-    new_data = pd.DataFrame([data.loc[i]*weights[i] for i in range(len(data))]).sum(axis=0)
-    
-    #calculating returns for a portfolio
-    result = new_data.copy(deep=True)
-    for i in range(1, len(new_data)):
-        result[i] = (new_data[i] - new_data[i-1])/new_data[i-1]
-
-    return result[1:]
+def _get_returns(data, assets, weights, from_date, to_date):
+    data.index = pd.to_datetime(data.index)
+    portfolio = (data[assets] * weights).sum(axis=1)
+    from_mask = portfolio.index >= pd.to_datetime(from_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
+    return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
 
 
 def stocks_returns(assets, weights, from_date, to_date):
-    from_date = change_date(from_date,-1)
-    to_date = change_date(to_date,1)
-    data = get_lst_assets(assets, from_date, to_date, types="Stock", exchange="NASDAQ")
-    returns = profit(data, weights)
-    
-    return returns
+    url = 'https://drive.google.com/file/d/1qbWyr-1lyecyRLh3sed1U_zwlqKiuZ_L/view?usp=sharing'
+    gdown.download(url, 'stocks.csv', fuzzy=True)
+    data = pd.read_csv('stocks.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
+
 
 def commodities_returns(assets, weights, from_date, to_date):
-    from_date = change_date(from_date,-1)
-    to_date = change_date(to_date,1)
-    data = get_lst_assets(assets, from_date, to_date, types="Commodity")
-    returns = profit(data, weights)
-    
-    return returns
+    url = 'https://drive.google.com/file/d/142bZSZ6WvNrXdNfb2jofU8RueWQ4skQg/view?usp=sharing'
+    gdown.download(url, 'commodities.csv', fuzzy=True)
+    data = pd.read_csv('commodities.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
 
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    from_date = change_date(from_date,-1)
-    to_date = change_date(to_date,1)
-    data = get_lst_assets(assets, from_date, to_date)
-    returns = profit(data, weights)
-    
-    return returns
+    url = 'https://drive.google.com/file/d/1ad67Ik0hUi1i4JvDqGKOgzLqJpuZqb_G/view?usp=sharing'
+    gdown.download(url, 'cryptocurrencies.csv', fuzzy=True)
+    data = pd.read_csv('cryptocurrencies.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
+
