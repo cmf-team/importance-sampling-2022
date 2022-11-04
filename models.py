@@ -1,3 +1,4 @@
+import numpy as np
 from arch import arch_model
 from scipy.stats import norm
 
@@ -14,7 +15,11 @@ class RiskMetrics:
         self.window_size = 74
 
     def forecast(self, feat):
-        raise Exception(NotImplementedError)
+        feat.reset_index(drop=True, inplace=True)
+        sigmas_sq = np.zeros((len(feat)))
+        for i in range(1, len(feat)):
+            sigmas_sq[i] = self.lambd * sigmas_sq[i - 1] + (1 - self.lambd) * feat[i - 1] ** 2
+        return norm.ppf(1 - self.alpha, scale=sigmas_sq[-1] ** 0.5)
 
 
 class HistoricalSimulation:
@@ -23,7 +28,7 @@ class HistoricalSimulation:
         self.window_size = window_size
 
     def forecast(self, feat):
-        raise Exception(NotImplementedError)
+        return np.percentile(feat[-self.window_size:], (1 - self.alpha) * 100)
 
 
 class GARCH11:
