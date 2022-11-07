@@ -1,126 +1,71 @@
-import yfinance as yf
 import pandas as pd
 import numpy as np
-import datetime as dt
+import gdown
+
+class Dataloader:
+    def __init__(
+            self,
+            series: pd.Series,
+            window_size: int,
+            step_size: int,
+            horizon: int,
+            first_pred: int
+    ):
+        self.series = series
+        self.window_size = window_size
+        self.step_size = step_size
+        self.horizon = horizon
+        self.first_pred = first_pred
+        assert self.first_pred > self.window_size
+        feat_idx = []
+        target_idx = []
+        for i in range(self.first_pred, self.series.shape[0], self.step_size):
+            feat_idx.append(range(i - self.horizon - self.window_size, i - self.horizon))
+            target_idx.append(i)
+        self.feat_idx = feat_idx
+        self.target_idx = target_idx
+
+    def __len__(self):
+        return len(self.feat_idx)
+
+    def __iter__(self):
+        self.iter = 0
+        return self
+
+    def __next__(self):
+        if self.iter < len(self.feat_idx):
+            feat = self.series.iloc[self.feat_idx[self.iter]]
+            target = self.series.iloc[self.target_idx[self.iter]]
+            self.iter += 1
+            return feat, target
+        else:
+            raise StopIteration
+
+
+def _get_returns(data, assets, weights, from_date, to_date):
+    data.index = pd.to_datetime(data.index)
+    portfolio = (data[assets] * weights).sum(axis=1)
+    from_mask = portfolio.index >= pd.to_datetime(from_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
+    return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
+
 
 def stocks_returns(assets, weights, from_date, to_date):
-    available_assets = ["AAPL", 'AMD', 'TSLA', 'AMZN', 'NVDA', 'INTC', 'MU', 'MSFT', 'META', 'GOOGL']
-    flag = 0
-    for requested_asset in assets[:]:
-        if requested_asset not in available_assets:
-            print('Cannot extract information on {}. See the list of available assets.'.format(requested_asset))
-            assets.remove(requested_asset)
-            flag = 1
-    if flag == 1:
-        print(available_assets)
-        
-    if len(assets) != len(weights):
-        print('Assets and Weights lenght do not match. Correct the vectors.')
-        return None
-    desired_start_date = dt.datetime.strptime(from_date, '%m/%d/%Y')
-    from_date =  desired_start_date - dt.timedelta(7)
-    to_date = dt.datetime.strptime(to_date, '%m/%d/%Y') + dt.timedelta(1)
-    
-    symbols = yf.download(assets, from_date, to_date)
-    symbols = symbols['Close'].reset_index()
-    symbols['Date'] = pd.to_datetime(symbols['Date'].dt.strftime('%Y-%m-%d'))
-    symbols.index = symbols['Date']
-    symbols.drop('Date', axis = 1, inplace = True)
-    for column in symbols.columns:
-        symbols[column] = (symbols[column] - symbols[column].shift(1))/symbols[column]
-    
-    symbols = symbols.iloc[1:, :]
-    symbols = symbols.fillna(0)
-    
-    if len(assets)==1:
-        symbols.columns = assets
-    
-    symbols['portfolio'] = [0]*symbols.shape[0]
-    symbols = symbols[symbols.index >= desired_start_date]
-    for i in range(len(assets)):
-        column = assets[i]
-        weight = weights[i]
-        symbols['portfolio'] += weight * symbols[column]
-    
-    return symbols['portfolio']
+    url = 'https://drive.google.com/file/d/1lLQV4oc30mo1_m39p4JXlpd1gV6pLw6A/view?usp=sharing'
+    gdown.download(url, 'stocks.csv', fuzzy=True)
+    data = pd.read_csv('stocks.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
+
 
 def commodities_returns(assets, weights, from_date, to_date):
-    commodities_dict = {'Brent Oil Futures': 'BZ=F', 'Crude Oil WTI Futures': 'CL=F', 'Natural Gas Futures': 'NG=F', 'Heating Oil Futures': 'HO=F', 
-                        'Gold Futures': 'GC=F', 'Silver Futures': 'SI=F', 'Copper Futures': 'HG=F', 'Platinum Futures': 'PL=F', 'US Coffe C Futures': 'KC=F', 'US Corn Futures': 'ZC=F'}
-    flag = 0
-    for requested_asset in assets[:]:
-        if requested_asset not in commodities_dict.keys():
-            print('Cannot extract information on {}. See the list of available assets.'.format(requested_asset))
-            assets.remove(requested_asset)
-            flag = 1
-    if flag == 1:
-        print(list(commodities_dict.keys()))
-        
-    if len(assets) != len(weights):
-        print('Assets and Weights lenght do not match. Correct the vectors.')
-        return None
-    desired_start_date = dt.datetime.strptime(from_date, '%m/%d/%Y')
-    from_date =  desired_start_date - dt.timedelta(7)
-    to_date = dt.datetime.strptime(to_date, '%m/%d/%Y') + dt.timedelta(1)
-    
-    symbols_list = [commodities_dict[asset] for asset in assets]
-    symbols = yf.download(symbols_list, from_date, to_date)
-    symbols = symbols['Close'].reset_index()
-    symbols['Date'] = pd.to_datetime(symbols['Date'].dt.strftime('%Y-%m-%d'))
-    symbols.index = symbols['Date']
-    symbols.drop('Date', axis = 1, inplace = True)
-    for column in symbols.columns:
-        symbols[column] = (symbols[column] - symbols[column].shift(1))/symbols[column]
-    symbols = symbols.iloc[1:, :]
-    symbols = symbols.fillna(0)
-    symbols = symbols[symbols.index >= desired_start_date]
-    if len(symbols_list)==1:
-        symbols.columns = symbols_list
-    
-    symbols['portfolio'] = [0]*symbols.shape[0]
-    for i in range(len(symbols_list)):
-        column = symbols_list[i]
-        weight = weights[i]
-        symbols['portfolio'] += weight * symbols[column]
-    
-    return symbols['portfolio']
+    url = 'https://drive.google.com/file/d/1GFq1jcV00BjFEa7hmZSO1xD7K4j4gv3O/view?usp=sharing'
+    gdown.download(url, 'commodities.csv', fuzzy=True)
+    data = pd.read_csv('commodities.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
+
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    available_assets = ['BTC-USD', 'ETH-USD', 'USDT-USD', 'USDC-USD', 'BNB-USD', 'XRP-USD', 'BUSD-USD', 'ADA-USD', 'SOL-USD', 'DOGE-USD']
-    flag = 0
-    for requested_asset in assets[:]:
-        if requested_asset not in available_assets:
-            print('Cannot extract information on {}. See the list of available assets.'.format(requested_asset))
-            assets.remove(requested_asset)
-            flag = 1
-    if flag == 1:
-        print(available_assets)
-        
-    if len(assets) != len(weights):
-        print('Assets and Weights lenght do not match. Correct the vectors.')
-        return None
-    desired_start_date = dt.datetime.strptime(from_date, '%m/%d/%Y')
-    from_date =  desired_start_date - dt.timedelta(7)
-    to_date = dt.datetime.strptime(to_date, '%m/%d/%Y') + dt.timedelta(1)
-    
-    symbols = yf.download(assets, from_date, to_date)
-    symbols = symbols['Close'].reset_index()
-    symbols['Date'] = pd.to_datetime(symbols['Date'].dt.strftime('%Y-%m-%d'))
-    symbols.index = symbols['Date']
-    symbols.drop('Date', axis = 1, inplace = True)
-    
-    for column in symbols.columns:
-        symbols[column] = (symbols[column] - symbols[column].shift(1))/symbols[column]
-    symbols = symbols.iloc[1:, :]
-    symbols = symbols.fillna(0)
-    symbols = symbols[symbols.index >= desired_start_date]
-    if len(assets)==1:
-        symbols.columns = assets
-    
-    symbols['portfolio'] = [0]*symbols.shape[0]
-    for i in range(len(assets)):
-        column = assets[i]
-        weight = weights[i]
-        symbols['portfolio'] += weight * symbols[column]
-    
-    return symbols['portfolio']
+    url = 'https://drive.google.com/file/d/1mPP5Vb57Jc2mYPeLYZPgAJM8ogjiguSO/view?usp=sharing'
+    gdown.download(url, 'cryptocurrencies.csv', fuzzy=True)
+    data = pd.read_csv('cryptocurrencies.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
