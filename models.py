@@ -15,7 +15,7 @@ class RiskMetrics:
 
     def forecast(self, feat):
         returns = list(reversed(feat.tolist()))[:self.window_size]
-        sigma_future = np.sum( [(returns[n]**2) * self.lambd * (1 - self.lambd)**n for n in range(self.window_size)] )
+        sigma_future = np.sum( [(returns[n]**2) * (1 - self.lambd) * self.lambd**(n) for n in range(self.window_size)] )
         self.scale = np.sqrt(sigma_future)
         
         return norm.ppf(1-self.alpha)*self.scale
