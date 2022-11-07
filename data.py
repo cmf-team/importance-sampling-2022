@@ -1,94 +1,71 @@
 import pandas as pd
 import numpy as np
-import yfinance as yf
-from datetime import datetime as dt
-from datetime import timedelta
+import gdown
+
+class Dataloader:
+    def __init__(
+            self,
+            series: pd.Series,
+            window_size: int,
+            step_size: int,
+            horizon: int,
+            first_pred: int
+    ):
+        self.series = series
+        self.window_size = window_size
+        self.step_size = step_size
+        self.horizon = horizon
+        self.first_pred = first_pred
+        assert self.first_pred > self.window_size
+        feat_idx = []
+        target_idx = []
+        for i in range(self.first_pred, self.series.shape[0], self.step_size):
+            feat_idx.append(range(i - self.horizon - self.window_size, i - self.horizon))
+            target_idx.append(i)
+        self.feat_idx = feat_idx
+        self.target_idx = target_idx
+
+    def __len__(self):
+        return len(self.feat_idx)
+
+    def __iter__(self):
+        self.iter = 0
+        return self
+
+    def __next__(self):
+        if self.iter < len(self.feat_idx):
+            feat = self.series.iloc[self.feat_idx[self.iter]]
+            target = self.series.iloc[self.target_idx[self.iter]]
+            self.iter += 1
+            return feat, target
+        else:
+            raise StopIteration
+
+
+def _get_returns(data, assets, weights, from_date, to_date):
+    data.index = pd.to_datetime(data.index)
+    portfolio = (data[assets] * weights).sum(axis=1)
+    from_mask = portfolio.index >= pd.to_datetime(from_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
+    return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
+
 
 def stocks_returns(assets, weights, from_date, to_date):
-    if len(assets) != len(weights):
-        raise ValueError("Length of weights does not match number of assets")
-    weights = np.array(weights)
-    weights /= sum(weights)
-    try:
-        to_date = dt.strftime(dt.strptime(to_date, '%m/%d/%Y'), '%Y-%m-%d')
-        from_date = dt.strftime(dt.strptime(from_date, '%m/%d/%Y'), '%Y-%m-%d')
-    except:
-        raise ValueError("Dates format do not match format '%d/%m/%Y'")
-    portfolio = yf.download(assets, dt.strftime(dt.strptime(from_date,
-            '%Y-%m-%d') - timedelta(days=1), '%Y-%m-%d'), dt.strftime(dt.strptime(to_date,
-            '%Y-%m-%d') + timedelta(days=1), '%Y-%m-%d'))['Adj Close']
-    if len(assets) == 1:
-        portfolio = pd.DataFrame(portfolio)
-        portfolio['return'] = portfolio['Adj Close'] / portfolio['Adj Close'].shift(1) - 1
-    else:
-        portfolio['portfolio'] = portfolio.values @ weights 
-        # I personally feel that this is wrong way to calculate the portfolio returns. But it is done
-        # exactly according to provided google document. I also attach here another (commented) chunk that
-        # I belive calculates the portfolio returns right - by weighting returns of each asset, not their price:
-        # for asset in assets:
-        #     portfolio[asset] = portfolio[asset] / portfolio[asset].shift(1) - 1
-        # portfolio['return'] = portfolio.values @ weights
-        portfolio['return'] = portfolio['portfolio'] / portfolio['portfolio'].shift(1) - 1
-    portfolio.reset_index(inplace=True)
-    portfolio['Date'] = pd.to_datetime(portfolio['Date'].dt.strftime('%Y-%m-%d'))
-    portfolio = portfolio[(portfolio['Date'] >= from_date) & (portfolio['Date'] <= to_date)]
-    portfolio.set_index('Date', drop=True, inplace=True)
-    return portfolio['return']
+    url = 'https://drive.google.com/file/d/1lLQV4oc30mo1_m39p4JXlpd1gV6pLw6A/view?usp=sharing'
+    gdown.download(url, 'stocks.csv', fuzzy=True)
+    data = pd.read_csv('stocks.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
+
 
 def commodities_returns(assets, weights, from_date, to_date):
-    dict = {'Brent Oil':'BZ=F', 'Crude Oil WTI':'CL=F', 'Natural Gas':'NG=F',
-            'Heating Oil':'HO=F', 'Gold':'GC=F', 'Silver':'SI=F', 'Copper':'HG=F',
-            'Platinum':'PL=F', 'US Coffee C':'KC=F', 'US Corn':'ZC=F'}
-    assets = [dict[asset] for asset in assets]
-    if len(assets) != len(weights):
-        raise ValueError("Length of weights does not match number of assets")
-    weights = np.array(weights)
-    weights /= sum(weights)
-    try:
-        to_date = dt.strftime(dt.strptime(to_date, '%m/%d/%Y'), '%Y-%m-%d')
-        from_date = dt.strftime(dt.strptime(from_date, '%m/%d/%Y'), '%Y-%m-%d')
-    except:
-        raise ValueError("Dates format do not match format '%d/%m/%Y'")
-    portfolio = yf.download(assets, dt.strftime(dt.strptime(from_date,
-            '%Y-%m-%d') - timedelta(days=1), '%Y-%m-%d'), dt.strftime(dt.strptime(to_date,
-            '%Y-%m-%d') + timedelta(days=1), '%Y-%m-%d'))['Adj Close']
-    if len(assets) == 1:
-        portfolio = pd.DataFrame(portfolio)
-        portfolio['return'] = portfolio['Adj Close'] / portfolio['Adj Close'].shift(1) - 1
-    else:
-        portfolio['portfolio'] = portfolio.values @ weights
-        portfolio['return'] = portfolio['portfolio'] / portfolio['portfolio'].shift(1) - 1
-    portfolio.reset_index(inplace=True)
-    portfolio['Date'] = pd.to_datetime(portfolio['Date'].dt.strftime('%Y-%m-%d'))
-    portfolio = portfolio[(portfolio['Date'] >= from_date) & (portfolio['Date'] <= to_date)]
-    portfolio.set_index('Date', drop=True, inplace=True)
-    return portfolio['return']
+    url = 'https://drive.google.com/file/d/1GFq1jcV00BjFEa7hmZSO1xD7K4j4gv3O/view?usp=sharing'
+    gdown.download(url, 'commodities.csv', fuzzy=True)
+    data = pd.read_csv('commodities.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
+
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    dict = {'BTC':'BTC-USD', 'ETH':'ETH-USD', 'USDT':'USDT-USD', 'USDC':'USDC-USD', 'BNB':'BNB-USD',
-            'XRP':'XRP-USD', 'BUSD':'BUSD-USD', 'ADA':'ADA-USD', 'SOL':'SOL-USD',
-            'DOGE':'DOGE-USD'}
-    assets = [dict[asset] for asset in assets]
-    if len(assets) != len(weights):
-        raise ValueError("Length of weights does not match number of assets")
-    weights = np.array(weights)
-    weights /= sum(weights)
-    try:
-        to_date = dt.strftime(dt.strptime(to_date, '%m/%d/%Y'), '%Y-%m-%d')
-        from_date = dt.strftime(dt.strptime(from_date, '%m/%d/%Y'), '%Y-%m-%d')
-    except:
-        raise ValueError("Dates format do not match format '%d/%m/%Y'")
-    portfolio = yf.download(assets, dt.strftime(dt.strptime(from_date,
-            '%Y-%m-%d') - timedelta(days=1), '%Y-%m-%d'), dt.strftime(dt.strptime(to_date,
-            '%Y-%m-%d') + timedelta(days=1), '%Y-%m-%d'))['Adj Close']
-    if len(assets) == 1:
-        portfolio = pd.DataFrame(portfolio)
-        portfolio['return'] = portfolio['Adj Close'] / portfolio['Adj Close'].shift(1) - 1
-    else:
-        portfolio['portfolio'] = portfolio.values @ weights
-        portfolio['return'] = portfolio['portfolio'] / portfolio['portfolio'].shift(1) - 1
-    portfolio.reset_index(inplace=True)
-    portfolio['Date'] = pd.to_datetime(portfolio['Date'].dt.strftime('%Y-%m-%d'))
-    portfolio = portfolio[(portfolio['Date'] >= from_date) & (portfolio['Date'] <= to_date)]
-    portfolio.set_index('Date', drop=True, inplace=True)
-    return portfolio['return']
+    url = 'https://drive.google.com/file/d/1mPP5Vb57Jc2mYPeLYZPgAJM8ogjiguSO/view?usp=sharing'
+    gdown.download(url, 'cryptocurrencies.csv', fuzzy=True)
+    data = pd.read_csv('cryptocurrencies.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
