@@ -1,68 +1,71 @@
 import pandas as pd
-import datetime as dt
-import investiny as inv
+import numpy as np
+import gdown
+
+class Dataloader:
+    def __init__(
+            self,
+            series: pd.Series,
+            window_size: int,
+            step_size: int,
+            horizon: int,
+            first_pred: int
+    ):
+        self.series = series
+        self.window_size = window_size
+        self.step_size = step_size
+        self.horizon = horizon
+        self.first_pred = first_pred
+        assert self.first_pred > self.window_size
+        feat_idx = []
+        target_idx = []
+        for i in range(self.first_pred, self.series.shape[0], self.step_size):
+            feat_idx.append(range(i - self.horizon - self.window_size, i - self.horizon))
+            target_idx.append(i)
+        self.feat_idx = feat_idx
+        self.target_idx = target_idx
+
+    def __len__(self):
+        return len(self.feat_idx)
+
+    def __iter__(self):
+        self.iter = 0
+        return self
+
+    def __next__(self):
+        if self.iter < len(self.feat_idx):
+            feat = self.series.iloc[self.feat_idx[self.iter]]
+            target = self.series.iloc[self.target_idx[self.iter]]
+            self.iter += 1
+            return feat, target
+        else:
+            raise StopIteration
+
+
+def _get_returns(data, assets, weights, from_date, to_date):
+    data.index = pd.to_datetime(data.index)
+    portfolio = (data[assets] * weights).sum(axis=1)
+    from_mask = portfolio.index >= pd.to_datetime(from_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
+    return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
+
+
+def stocks_returns(assets, weights, from_date, to_date):
+    url = 'https://drive.google.com/file/d/1lLQV4oc30mo1_m39p4JXlpd1gV6pLw6A/view?usp=sharing'
+    gdown.download(url, 'stocks.csv', fuzzy=True)
+    data = pd.read_csv('stocks.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
+
+
+def commodities_returns(assets, weights, from_date, to_date):
+    url = 'https://drive.google.com/file/d/1GFq1jcV00BjFEa7hmZSO1xD7K4j4gv3O/view?usp=sharing'
+    gdown.download(url, 'commodities.csv', fuzzy=True)
+    data = pd.read_csv('commodities.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
 
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    from_date = (dt.datetime.strptime(from_date, '%m/%d/%Y')-dt.timedelta(days=1)).strftime('%m/%d/%Y')
-    to_date= (dt.datetime.strptime(to_date, '%m/%d/%Y')+dt.timedelta(days=1)).strftime('%m/%d/%Y')
-    returns = pd.DataFrame()
-    for asset in assets:
-        ticker = int(inv.search_assets(query=asset, limit=1, exchange='Binance')[0]['ticker'])
-        data = pd.DataFrame(inv.historical_data(investing_id=ticker, from_date=from_date, to_date=to_date)).set_index('date').drop(columns=['open','low','volume','high'])
-        returns = pd.concat([returns,data.diff().rename(columns={'close': 'diff_'+asset}),data.rename(columns={'close': asset})],axis = 1)
-    del data
-    returns['wipim1'] = 0
-    returns['widiff'] = 0
-    for i in range(len(assets)):
-        returns['wipim1'] += returns[assets[i]] * weights[i]
-        returns['widiff'] += returns['diff_'+assets[i]] * weights[i]
-    returns['wipim1'] = returns.wipim1.shift(1)   
-    return (returns['widiff']/returns['wipim1']).dropna();
-def stocks_returns(assets, weights, from_date, to_date):
-    from_date = (dt.datetime.strptime(from_date, '%m/%d/%Y')-dt.timedelta(days=1)).strftime('%m/%d/%Y')
-    to_date= (dt.datetime.strptime(to_date, '%m/%d/%Y')+dt.timedelta(days=1)).strftime('%m/%d/%Y')
-    returns = pd.DataFrame()
-    for asset in assets:
-        ticker = int(inv.search_assets(query=asset, limit=1, exchange='NASDAQ')[0]['ticker'])
-        data = pd.DataFrame(inv.historical_data(investing_id=ticker, from_date=from_date, to_date=to_date)).set_index('date').drop(columns=['open','low','volume','high'])
-        returns = pd.concat([returns,data.diff().rename(columns={'close': 'diff_'+asset}),data.rename(columns={'close': asset})],axis = 1)
-    del data
-    returns['wipim1'] = 0
-    returns['widiff'] = 0
-    for i in range(len(assets)):
-        returns['wipim1'] += returns[assets[i]] * weights[i]
-        returns['widiff'] += returns['diff_'+assets[i]] * weights[i]
-    returns['wipim1'] = returns.wipim1.shift(1)   
-    return (returns['widiff']/returns['wipim1']).dropna();
-def commodities_returns(assets, weights, from_date, to_date):
-    from_date = (dt.datetime.strptime(from_date, '%m/%d/%Y')-dt.timedelta(days=1)).strftime('%m/%d/%Y')
-    to_date= (dt.datetime.strptime(to_date, '%m/%d/%Y')+dt.timedelta(days=1)).strftime('%m/%d/%Y')
-    returns = pd.DataFrame()
-    for asset in assets:
-        ticker = int(inv.search_assets(query=asset, limit=1, exchange='ICE')[0]['ticker'])
-        data = pd.DataFrame(inv.historical_data(investing_id=ticker, from_date=from_date, to_date=to_date)).set_index('date').drop(columns=['open','low','volume','high'])
-        returns = pd.concat([returns,data.diff().rename(columns={'close': 'diff_'+asset}),data.rename(columns={'close': asset})],axis = 1)
-    del data
-    returns['wipim1'] = 0
-    returns['widiff'] = 0
-    for i in range(len(assets)):
-        returns['wipim1'] += returns[assets[i]] * weights[i]
-        returns['widiff'] += returns['diff_'+assets[i]] * weights[i]
-    returns['wipim1'] = returns.wipim1.shift(1)   
-    return (returns['widiff']/returns['wipim1']).dropna();
-
-# TEST DATA
-# stocks = ['APPL','GOOGL']
-# cryptos = ['BTCUSD','BNBUSD']
-# commodities  = ['US Coffee C Futures','Crude Oil WTI Futures']
-
-# weights = [0.3, 0.7]
-# from_date="09/01/2022"
-# to_date="09/07/2022"
-# print(cryptos)
-# print(cryptocurrencies_returns(cryptos, weights, from_date, to_date))
-# print(stocks)
-# print(stocks_returns(stocks, weights, from_date, to_date))
-# print(commodities)
-# print(commodities_returns(commodities, weights, from_date, to_date))
+    url = 'https://drive.google.com/file/d/1mPP5Vb57Jc2mYPeLYZPgAJM8ogjiguSO/view?usp=sharing'
+    gdown.download(url, 'cryptocurrencies.csv', fuzzy=True)
+    data = pd.read_csv('cryptocurrencies.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
