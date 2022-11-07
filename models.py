@@ -46,18 +46,3 @@ class GARCH11:
         sigma2 = res.forecast(horizon=1, reindex=False).variance.values[0, 0]
         return norm.ppf(1 - self.alpha, scale=sigma2**0.5)
 
-# %% 
-assets = ['AAPL', 'GOOGL']
-weights = [0.3, 0.7]
-returns = stocks_returns(assets, weights, from_date='09/02/2020', to_date='09/02/2022')
-logreturns = np.log(returns + 1)
-# %% 
-# VaR_HS = HistoricalSimulation(0.05, 74).forecast(returns)
-# print(VaR_HS)
-# %% 
-# VaR_RM = RiskMetrics(0.05).forecast(returns)
-# print(VaR_RM)
-# # %%
-# a = [i for i in range(10)]
-# print(a[-10])
-# %% 
