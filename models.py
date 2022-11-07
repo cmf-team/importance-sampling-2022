@@ -14,7 +14,11 @@ class RiskMetrics:
         self.window_size = 74
 
     def forecast(self, feat):
-        raise Exception(NotImplementedError)
+        returns = list(reversed(feat.tolist()))[:self.window_size]
+        sigma_future = np.sum( [(returns[n]**2) * self.lambd * (1 - self.lambd)**n for n in range(self.window_size)] )
+        self.scale = np.sqrt(sigma_future)
+        
+        return norm.ppf(1-self.alpha)*self.scale
 
 
 class HistoricalSimulation:
@@ -23,7 +27,8 @@ class HistoricalSimulation:
         self.window_size = window_size
 
     def forecast(self, feat):
-        raise Exception(NotImplementedError)
+        returns = list(reversed(feat.tolist()))[:self.window_size]
+        return np.quantile(returns, 1 - self.alpha)
 
 
 class GARCH11:
