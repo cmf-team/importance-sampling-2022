@@ -1,4 +1,5 @@
 pandas
 numpy
-yfinance
-datetime
+scipy
+arch
+gdown
