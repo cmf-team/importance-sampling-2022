@@ -18,7 +18,7 @@ class RiskMetrics:
     def forecast(self, feat):
         sigma_squared = np.zeros(len(feat))
         for i in range(1, len(feat)):
-            sigma_squared = self.lambd * sigma_squared[i - 1] + (1 - self.lambd) * feat[i - 1] ** 2
+            sigma_squared[i] = self.lambd * sigma_squared[i - 1] + (1 - self.lambd) * feat[i - 1] ** 2
         sigma_sq = sigma_squared[-1]
         return norm.ppf(1 - self.alpha, scale=sigma_sq ** 0.5)
 
