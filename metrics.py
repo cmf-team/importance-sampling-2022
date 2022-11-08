@@ -1,5 +1,5 @@
 import numpy as np
-import scipy as stats
+import scipy.stats as stats
 
 
 def pof_test(var, target, alpha=0.99):
