@@ -2,4 +2,3 @@ pandas
 numpy
 scipy
 arch
-investiny
