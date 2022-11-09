@@ -1,5 +1,6 @@
 from arch import arch_model
 from scipy.stats import norm
+import numpy as np
 
 
 class RiskMetrics:
@@ -14,7 +15,13 @@ class RiskMetrics:
         self.window_size = 74
 
     def forecast(self, feat):
-        raise Exception(NotImplementedError)
+        prev_sigm = 0
+
+        for feat_ in feat[1:]:
+            current_sigm = self.lambd * prev_sigm + (1- self.lambd) * (feat_ ** 2)
+            prev_sigm = current_sigm
+
+        return norm.ppf(1 - self.alpha, scale=current_sigm ** .5)
 
 
 class HistoricalSimulation:
@@ -23,7 +30,11 @@ class HistoricalSimulation:
         self.window_size = window_size
 
     def forecast(self, feat):
-        raise Exception(NotImplementedError)
+        # get features corresponding to window size
+        feat_current = feat[-self.window_size:]
+        return np.quantile(feat_current, q=(1 - self.alpha))
+
+
 
 
 class GARCH11:
