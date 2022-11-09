@@ -9,6 +9,7 @@ from data import (
 from metrics import pof_test, if_test, quantile_loss
 from models import HistoricalSimulation, RiskMetrics
 
+
 class TestData:
     def test_stocks_returns(self):
         assets = ['AAPL']

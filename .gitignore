@@ -6,5 +6,6 @@ __pycache__
 /historical_data
 /historical_data.zip
 
+scratch.ipynb
 # Task 1
 get_csv_data.ipynb
