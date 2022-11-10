@@ -1,14 +1,6 @@
 from arch import arch_model
 from scipy.stats import norm
 
-import numpy as np
-from data import (
-    stocks_returns, 
-    commodities_returns, 
-    cryptocurrencies_returns, 
-    Dataloader
-)
-
 class RiskMetrics:
     '''
     Longerstaey, Jacques, and Martin Spencer. "Riskmetricstm—technical
@@ -35,6 +27,7 @@ class HistoricalSimulation:
         return feat.iloc[-self.window_size:].quantile(1-self.alpha)
 
 
+
 class GARCH11:
     def __init__(self, alpha, window_size):
         self.alpha = alpha
@@ -45,4 +38,3 @@ class GARCH11:
         res = model.fit(disp='off')
         sigma2 = res.forecast(horizon=1, reindex=False).variance.values[0, 0]
         return norm.ppf(1 - self.alpha, scale=sigma2**0.5)
-

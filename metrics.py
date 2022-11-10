@@ -34,3 +34,4 @@ def quantile_loss(var, target, alpha=0.99):
     # Return: Mean value for quantile loss
     return np.array([2 * alpha * (var[i] - target[i]) if target[i] < var[i] else 2 * (1 - alpha) * (target[i] - var[i]) 
      for i in range(len(var))]).mean()
+
