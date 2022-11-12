@@ -3,3 +3,5 @@ numpy
 yfinance
 pandas_datareader
 datetime
+scipy
+arch
