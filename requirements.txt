@@ -1,7 +1,5 @@
 pandas
 numpy
-yfinance
-pandas_datareader
-datetime
+gdown
 scipy
 arch
