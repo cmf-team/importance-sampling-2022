@@ -11,7 +11,7 @@ def pof_test(var, target, alpha=0.99):
     a = alpha ** (N - X) * (1 - alpha) ** X
     b = (1 - X / N) ** (N - X) * (X / N) ** X
     POF = -2 * np.log(a / b)
-    p_value = 1 - stats.chi2.cdf(POF, df=1)
+    p_value = 1 - chi2.cdf(POF, df=1)
     return  p_value
 
 
@@ -33,7 +33,7 @@ def if_test(var, target):
     a = (1 - pi) ** (n_00 + n_10) * pi ** (n_01 + n_11)
     b = (1 - pi_0) ** n_00 * pi_0 ** n_01 * (1 - pi_1) ** n_10 * pi_1 ** n_11
     CCI = -2 * (np.log(a / b))
-    p_value = 1 - stats.chi2.cdf(CCI, df=1)
+    p_value = 1 - chi2.cdf(CCI, df=1)
     return p_value
 
 
