@@ -1,9 +1,6 @@
 import pandas as pd
 import numpy as np
-import yfinance as yf
-from datetime import datetime
-from datetime import timedelta
-from pandas_datareader import data as pdr
+import gdown
 
 
 class Dataloader:
@@ -44,32 +41,32 @@ class Dataloader:
             return feat, target
         else:
             raise StopIteration
-            
 
-def get_portfolio(assets, weights, start, end):
-    yf.pdr_override()
-    data = pdr.get_data_yahoo(assets,
-                              start=pd.to_datetime(datetime.strptime(start, '%m/%d/%Y').strftime('%m/%d/%Y')),
-                              end=pd.to_datetime(datetime.strptime(end, '%m/%d/%Y').strftime('%m/%d/%Y'))+timedelta(days=1))['Close']
-    data.dropna(inplace=True)
-    if len(assets) != 1:
-        return pd.Series(data=np.dot(data, weights),
-                         index=data.index)
-    else:
-        return pd.Series(data=data * weights,
-                         index=data.index)
+
+def _get_returns(data, assets, weights, from_date, to_date):
+    data.index = pd.to_datetime(data.index)
+    portfolio = (data[assets] * weights).sum(axis=1)
+    from_mask = portfolio.index >= pd.to_datetime(from_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
+    return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
 
 
 def stocks_returns(assets, weights, from_date, to_date):
-    d = get_portfolio(assets, weights, from_date, to_date)
-    return (d / d.shift(1) - 1)[1:]
+    url = 'https://drive.google.com/file/d/1lLQV4oc30mo1_m39p4JXlpd1gV6pLw6A/view?usp=sharing'
+    gdown.download(url, 'stocks.csv', fuzzy=True)
+    data = pd.read_csv('stocks.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
 
 
 def commodities_returns(assets, weights, from_date, to_date):
-    d = get_portfolio(assets, weights, from_date, to_date)
-    return (d / d.shift(1) - 1)[1:]
+    url = 'https://drive.google.com/file/d/1GFq1jcV00BjFEa7hmZSO1xD7K4j4gv3O/view?usp=sharing'
+    gdown.download(url, 'commodities.csv', fuzzy=True)
+    data = pd.read_csv('commodities.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
 
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    d = get_portfolio(assets, weights, from_date, to_date)
-    return (d / d.shift(1) - 1)[1:]
+    url = 'https://drive.google.com/file/d/1mPP5Vb57Jc2mYPeLYZPgAJM8ogjiguSO/view?usp=sharing'
+    gdown.download(url, 'cryptocurrencies.csv', fuzzy=True)
+    data = pd.read_csv('cryptocurrencies.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
