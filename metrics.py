@@ -1,3 +1,7 @@
+from scipy.stats import chi2
+import numpy as np
+
+
 def pof_test(var, target, alpha=0.99):
     N = len(var)
     X = 0
