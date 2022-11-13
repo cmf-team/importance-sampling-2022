@@ -3,5 +3,3 @@ numpy
 scipy
 arch
 gdown
-math
-scipy.stats

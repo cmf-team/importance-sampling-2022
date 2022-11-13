@@ -21,9 +21,8 @@ class RiskMetrics:
         
             sigma2[t] = self.lambd * sigma2[t - 1] + (1 - self.lambd) * feat[t - 1] ** 2
 
-        sigma = np.sum(sigma2)
 
-        return norm.ppf(1 - self.alpha, scale=sigma**0.5)
+        return norm.ppf(1 - self.alpha, scale=sigma2[len(sigma2) - 1]**0.5)
 
 
 class HistoricalSimulation:
