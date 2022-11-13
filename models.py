@@ -13,8 +13,8 @@ class RiskMetrics:
         distribution = feat[-self.window_size:]
         sigma2 = 0
         for i in range(len(distribution)):
-            sigma2 = self.lambd * sigma2 + (1 - self.lambd) * distribution[i] ** 2 
-        VaR = norm.ppf(1 - self.alpha, scale = np.sqrt(sigma2))
+            sigma2 = self.lambd * sigma2 + (1 - self.lambd) * distribution[i] ** 2
+        VaR = norm.ppf(1 - self.alpha, scale=np.sqrt(sigma2))
         return VaR
 
 
