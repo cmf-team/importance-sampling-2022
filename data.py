@@ -46,7 +46,7 @@ def _inc(data, assets, weights, from_date, to_date):
     data.index = pd.to_datetime(data.index)
     portfolio = (data[assets] * weights).sum(axis=1)
     from_mask = portfolio.index >= pd.to_datetime(from_date)
-    to_mask = _portfolio.index <= pd.to_datetime(to_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
     return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
 
 def stocks_returns(assets, weights, from_date, to_date):
