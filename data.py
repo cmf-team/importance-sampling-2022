@@ -42,15 +42,12 @@ class Dataloader:
 
 
 def stocks_returns(assets, weights, from_date, to_date):
-    """ Gets returns for stocks """
-    return get_returns('stocks', assets, weights, from_date, to_date)
+    raise Exception(NotImplementedError)
 
 
 def commodities_returns(assets, weights, from_date, to_date):
-    """ Gets returns for commodities """
-    return get_returns('commodities', assets, weights, from_date, to_date)
+   raise Exception(NotImplementedError)
 
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    """ Gets returns for cryptocurrencies """
-    return get_returns('crypto', assets, weights, from_date, to_date)
+    raise Exception(NotImplementedError)
