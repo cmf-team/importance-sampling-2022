@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-
 class Dataloader:
     def __init__(
             self,
@@ -39,15 +38,30 @@ class Dataloader:
             return feat, target
         else:
             raise StopIteration
+            
+            
+import gdown as gd
 
+def _inc(data, assets, weights, from_date, to_date):
+    data.index = pd.to_datetime(data.index)
+    portfolio = (data[assets] * weights).sum(axis=1)
+    from_mask = portfolio.index >= pd.to_datetime(from_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
+    return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
 
 def stocks_returns(assets, weights, from_date, to_date):
-    raise Exception(NotImplementedError)
+    gd.download('https://drive.google.com/file/d/1c0TBGNWis5fT6CT1HFEpJ4s7kPWLI4s1/view?usp=sharing', 'stocks.csv', fuzzy=True)
+    data = pd.read_csv('shares.csv', index_col=0)
+    return _inc(data, assets, weights, from_date, to_date)
 
 
 def commodities_returns(assets, weights, from_date, to_date):
-    raise Exception(NotImplementedError)
+    gd.download('https://drive.google.com/file/d/10vxYliiGjhhwsYMV1diR2IV5jnJLaIiJ/view?usp=sharing', 'commodities.csv', fuzzy=True)
+    data = pd.read_csv('commodities.csv', index_col=0)
+    return _inc(data, assets, weights, from_date, to_date)
 
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    raise Exception(NotImplementedError)
+    gd.download('https://drive.google.com/file/d/1kjY92ZsMQcu_j4ylazwc9zxFKGGacawJ/view?usp=share_link', '_crypto.csv', fuzzy=True)
+    data = pd.read_csv('_crypto.csv', index_col=0)
+    return _inc(data, assets, weights, from_date, to_date)
