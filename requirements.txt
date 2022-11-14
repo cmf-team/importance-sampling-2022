@@ -4,3 +4,4 @@ scipy
 arch
 pytest
 gdown
+pytest

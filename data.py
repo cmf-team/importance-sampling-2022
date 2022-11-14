@@ -1,3 +1,5 @@
+import os
+import subprocess
 import pandas as pd
 import numpy as np
 import gdown
@@ -48,6 +50,7 @@ def _get_returns(data, assets, weights, from_date, to_date):
     from_mask = portfolio.index >= pd.to_datetime(from_date)
     to_mask = portfolio.index <= pd.to_datetime(to_date)
     return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
+
 
 
 def stocks_returns(assets, weights, from_date, to_date):
