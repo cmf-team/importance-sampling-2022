@@ -5,8 +5,6 @@ import os
 from typing import List
 
 # The data was obtained from investing.com using `investiny` on 2022-10-13 UTC+0.
-# See `get_csv_data.ipynb` to find the ticker ID's and source code that was used
-# to collect the data.
 GDRIVE_URL = 'https://drive.google.com/uc?id=1Z8zpuf6mKZcxiEAH9Q04vTdpKeurFQWe'
 # name of the archive that will be downloaded
 ARCHIVE_NAME = 'historical_data.zip'
@@ -15,7 +13,7 @@ DATA_DIR = 'historical_data'
 
 
 def download_data(keep_archive=False):
-    """ Downloads historical data from Google Drive.
+    """Downloads historical data from Google Drive.
 
     This function will download the archive with historical data and
     extract it to the directory 'historical_data', if this directory is not found.
@@ -31,14 +29,14 @@ def download_data(keep_archive=False):
         if not keep_archive:
             os.remove(ARCHIVE_NAME)
     elif os.path.exists(DATA_DIR):
-        print(f'Data directory \'{DATA_DIR}\' exists. Will not download the data.')
+        print(f'Loading data from existing directory \'{DATA_DIR}\'')
     elif os.path.exists(ARCHIVE_NAME):
-        print(f'Archive \'{ARCHIVE_NAME}\' exists. Will not download the data.')
+        print(f'Loading data from existing archive \'{ARCHIVE_NAME}\'')
 
 
 def get_returns(asset_type: str, assets: List[str], weights: List[float],
                 from_date: str, to_date: str) -> pd.Series:
-    """ Downloads daily historical data for specified assets and calculates returns.
+    """Downloads daily historical data for specified assets and calculates returns.
 
     This function will download the archive with historical data and extract it to the
     directory 'historical_data', if this directory is not found. See `download_data()`.
@@ -73,11 +71,11 @@ def get_returns(asset_type: str, assets: List[str], weights: List[float],
     download_data()
 
     portfolio_price = None
+    df = pd.read_csv(os.path.join(DATA_DIR, asset_type + '.csv'))
+    df['Date'] = pd.to_datetime(df['Date'])
+    df = df.set_index('Date')
     for i in range(len(assets)):
-        df = pd.read_csv(os.path.join(DATA_DIR, asset_type, f'{assets[i]}.csv'))
-        df['date'] = pd.to_datetime(df['date'])
-        df = df.set_index('date')
-        asset_price = df['close'] * weights[i]
+        asset_price = df[assets[i]] * weights[i]
         if i == 0:
             portfolio_price = asset_price.copy()
         else:
@@ -101,3 +99,43 @@ def commodities_returns(assets, weights, from_date, to_date):
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
     """ Gets returns for cryptocurrencies """
     return get_returns('crypto', assets, weights, from_date, to_date)
+
+
+class Dataloader:
+    def __init__(
+            self,
+            series: pd.Series,
+            window_size: int,
+            step_size: int,
+            horizon: int,
+            first_pred: int
+    ):
+        self.series = series
+        self.window_size = window_size
+        self.step_size = step_size
+        self.horizon = horizon
+        self.first_pred = first_pred
+        assert self.first_pred > self.window_size
+        feat_idx = []
+        target_idx = []
+        for i in range(self.first_pred, self.series.shape[0], self.step_size):
+            feat_idx.append(range(i - self.horizon - self.window_size, i - self.horizon))
+            target_idx.append(i)
+        self.feat_idx = feat_idx
+        self.target_idx = target_idx
+
+    def __len__(self):
+        return len(self.feat_idx)
+
+    def __iter__(self):
+        self.iter = 0
+        return self
+
+    def __next__(self):
+        if self.iter < len(self.feat_idx):
+            feat = self.series.iloc[self.feat_idx[self.iter]]
+            target = self.series.iloc[self.target_idx[self.iter]]
+            self.iter += 1
+            return feat, target
+        else:
+            raise StopIteration
