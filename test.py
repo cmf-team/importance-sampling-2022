@@ -31,7 +31,7 @@ def test_stocks_returns():
     )
     assert np.allclose(returns, test_returns, atol=0.0001)
 
-def test_commodities_returns(self):
+def test_commodities_returns():
         assets = [
             'Brent Oil', 'Crude Oil WTI', 'Natural Gas',
             'Heating Oil', 'Gold', 'Silver', 'Copper', 
