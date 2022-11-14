@@ -1,59 +1,38 @@
 import numpy as np
-import scipy.stats as ss
-
-
-# see https://la.mathworks.com/help/risk/overview-of-var-backtesting.html
-# and https://www.value-at-risk.net/backtesting-coverage-tests/
-# for tests descriptions
-
+from scipy import stats
 
 def pof_test(var, target, alpha=0.99):
-    # note that I reversed the definitions of x here (c.f. mathworks site)
-    # alpha = VaR level
-    # x - number of times target < var
-    # x/N should be equal to 1-alpha
-    # so observe x failures ~= 1-alpha times
-
-    N = var.shape[0]  # num of observations
-    x = np.sum(target < var)  # num of failures
-    lr_pof = -2 * np.log(((alpha ** (N - x)) * ((1 - alpha) ** x)) / (((1 - x / N) ** (N - x)) * (x / N) ** x))
-    pvalue = 1 - ss.chi2.cdf(lr_pof, df=1)
-    return pvalue
-
+    size=len(var)  
+    tg=np.sum(target<var)
+    fin=-2*np.log(((alpha**(size-tg))*((1-alpha)**tg))/(((1-tg/size)**(size-tg))*(tg/size)**tg))
+    return 1-stats.chi2.cdf(fin,1)
 
 def if_test(var, target):
-    x = (target < var).astype(int)  # num of failures, consistent with mathworks
-    # TODO: optimize using vectorization
-    n00 = 0
-    n10 = 0
-    n01 = 0
-    n11 = 0
-    for i in range(1, len(x)):
-        if x[i] == 0 and x[i - 1] == 0:
-            n00 += 1
-        if x[i] == 1 and x[i - 1] == 0:
-            n01 += 1
-        if x[i] == 1 and x[i - 1] == 0:
-            n10 += 1
-        if x[i] == 1 and x[i - 1] == 1:
-            n11 += 1
-
-    pi0 = n01 / (n00 + n01)
-    pi1 = n11 / (n10 + n11)
-    pi = (n01 + n11) / (n00 + n01 + n10 + n11)
-
-    lr_cci = -2 * np.log(
-        ((1 - pi) ** (n00 + n10) * pi ** (n01 + n11))
-        / ((1 - pi0) ** (n00) * pi0 ** (n01) * (1 - pi1) ** n10 * pi1**n11)
-    )
-    # "probability of right tail should be small to reject the null hypothesis"
-    pvalue = 1 - ss.chi2.cdf(lr_cci, df=1)
-    # print(f"{lr_cci=} {pvalue=}")
-    return pvalue
-
+    counter=np.zeros(4)
+    Dummy_=[]
+    for i in range(len(var)):
+        Dummy_.append(int(target[i]<var[i]))
+    #print(Dummy_)
+    for i in range(1,len(Dummy_)):
+        if Dummy_[i]==0 and Dummy_[i-1]==0:
+            counter[0] += 1
+        if Dummy_[i]==0 and Dummy_[i-1]==1:
+            counter[1] += 1
+        if Dummy_[i]==1 and Dummy_[i-1]==0:
+            counter[2] += 1
+        if Dummy_[i]==1 and Dummy_[i-1]==1:
+            counter[3] += 1
+    x=counter[1]/(counter[0]+counter[1])
+    y=counter[3]/(counter[2]+counter[3])
+    total=(counter[1]+counter[3])/(np.sum(counter))
+    fin=-2*np.log(((1-total)**(counter[0]+counter[2])*total**(counter[1]+counter[3]))/((1-x)**(counter[0])*x**(counter[1])*(1-y)**counter[2]*y**counter[3]))
+    return 1-stats.chi2.cdf(fin, 1)
 
 def quantile_loss(var, target, alpha=0.99):
-    x = 2 * alpha * (var - target)
-    y = 2 * (1 - alpha) * (target - var)
-    loss = np.where(target < var, x, y)
+    loss=np.zeros(len(var))
+    for i in range(len(var)):
+        if (target[i]<var[i]):
+            loss[i]=2*alpha*(var[i]-target[i])
+        else:
+            loss[i]=2*(1-alpha)*(target[i]-var[i])
     return loss.mean()
