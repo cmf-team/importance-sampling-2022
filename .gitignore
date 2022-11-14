@@ -1,0 +1,15 @@
+.DS_Store
+
+__pycache__
+.ipynb_checkpoints
+env
+
+
+# my local files
+Notebook.ipynb
+Makefile
+commodities.csv
+cryptocurrencies.csv
+stocks.csv
+
+my_requirements.txt
