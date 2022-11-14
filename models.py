@@ -1,5 +1,6 @@
 from arch import arch_model
 from scipy.stats import norm
+import numpy as np
 
 
 class RiskMetrics:
