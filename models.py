@@ -5,6 +5,7 @@ import numpy as np
 
 
 
+
 class RiskMetrics:
     '''
     Longerstaey, Jacques, and Martin Spencer. "Riskmetricstm—technical
@@ -17,11 +18,13 @@ class RiskMetrics:
         self.window_size = 74
 
     def forecast(self, feat):
+
         returns = list(reversed(feat.tolist()))[:self.window_size]
         next_sigma = np.sum([(returns[i] ** 2) * self.lambd * (1 - self.lambd) ** i for i in range(self.window_size)])
         variance = np.sqrt(next_sigma)
         
         return norm.ppf(1 - self.alpha) * variance
+
 
 
 class HistoricalSimulation:
@@ -30,9 +33,11 @@ class HistoricalSimulation:
         self.window_size = window_size
 
     def forecast(self, feat):
+
         returns = list(reversed(feat.tolist()))[:self.window_size]
         return np.quantile(returns, 1 - self.alpha)
         # raise Exception(NotImplementedError)
+
 
 
 class GARCH11:
@@ -44,4 +49,6 @@ class GARCH11:
         model = arch_model(feat[-self.window_size:], p=1, q=1, rescale=False)
         res = model.fit(disp='off')
         sigma2 = res.forecast(horizon=1, reindex=False).variance.values[0, 0]
+
         return norm.ppf(1 - self.alpha, scale=sigma2**0.5)
+

@@ -47,19 +47,11 @@ def if_test(var, target):
 
 
 def quantile_loss(var, target, alpha=0.99):
-#     return 2 * alpha * (var - target) if var > target else 2 * (1 - alpha) * (target - var)
-#     ar =[2 * alpha * (v - t) if v > t else 2 * (1 - alpha) * (t - v) for t, v, alpha in zip(target, var, np.ones(10)*alpha )]
-#     return np.mean(ar)
 
     iqloss = []
     return_array = [(t - v) for (t, v) in zip(target, var)]
     for i in return_array:
         iqloss.append(2 * (1 - alpha) * i if i>=0 else -2 * alpha * i)
-#         if i >= 0:
-#             stats.append(2 * (1 - alpha) * i)
-#         else:
-#             stat.append(-2 * alpha * i)
-    
+
     return np.average(iqloss)
 
-#     raise Exception(NotImplementedError)
