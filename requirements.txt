@@ -4,5 +4,6 @@ numpy
 datetime
 yfinance
 scipy
+gdown
 
 
