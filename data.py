@@ -2,109 +2,73 @@ import os
 import subprocess
 import pandas as pd
 import numpy as np
+import gdown
+
+class Dataloader:
+    def __init__(
+            self,
+            series: pd.Series,
+            window_size: int,
+            step_size: int,
+            horizon: int,
+            first_pred: int
+    ):
+        self.series = series
+        self.window_size = window_size
+        self.step_size = step_size
+        self.horizon = horizon
+        self.first_pred = first_pred
+        assert self.first_pred > self.window_size
+        feat_idx = []
+        target_idx = []
+        for i in range(self.first_pred, self.series.shape[0], self.step_size):
+            feat_idx.append(range(i - self.horizon - self.window_size, i - self.horizon))
+            target_idx.append(i)
+        self.feat_idx = feat_idx
+        self.target_idx = target_idx
+
+    def __len__(self):
+        return len(self.feat_idx)
+
+    def __iter__(self):
+        self.iter = 0
+        return self
+
+    def __next__(self):
+        if self.iter < len(self.feat_idx):
+            feat = self.series.iloc[self.feat_idx[self.iter]]
+            target = self.series.iloc[self.target_idx[self.iter]]
+            self.iter += 1
+            return feat, target
+        else:
+            raise StopIteration
+
+
+def _get_returns(data, assets, weights, from_date, to_date):
+    data.index = pd.to_datetime(data.index)
+    portfolio = (data[assets] * weights).sum(axis=1)
+    from_mask = portfolio.index >= pd.to_datetime(from_date)
+    to_mask = portfolio.index <= pd.to_datetime(to_date)
+    return (portfolio / portfolio.shift() - 1)[from_mask & to_mask]
+
 
 
 def stocks_returns(assets, weights, from_date, to_date):
-    """
-    Constructs the returns of stock portfolio
-    Args:
-    assets - tickers of assets
-    Possible assets:
-    AAPL, AMD, AMZN, GOOGL, INTC, META, MSFT, MU, NVDA, TSLA
-
-    weights - weights of portfolio, should sum up to one
-    from_date - start date, mm/dd/yyyy
-    to_date - end_date, mm/dd/yyyy
-    """
-    check_data_download()
-    data = construct_data('stocks', assets)
-    return construct_portfolio(data, assets, weights, from_date, to_date)
+    url = 'https://drive.google.com/file/d/1lLQV4oc30mo1_m39p4JXlpd1gV6pLw6A/view?usp=sharing'
+    gdown.download(url, 'stocks.csv', fuzzy=True)
+    data = pd.read_csv('stocks.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
 
 
 def commodities_returns(assets, weights, from_date, to_date):
-    """
-    Constructs the returns of commodities portfolio
-    Args:
-    assets - tickers of assets
-    Possible assets:
-    Brent Oil, Copper, Crude Oil WTI, Gold, Heating Oil,
-    Natural Gas, Platinum, Silver, US Coffee C, US Corn
-
-    weights - weights of portfolio, should sum up to one
-    from_date - start date, mm/dd/yyyy
-    to_date - end_date, mm/dd/yyyy
-    """
-    check_data_download()
-    data = construct_data('commodities', assets)
-    return construct_portfolio(data, assets, weights, from_date, to_date)
+    url = 'https://drive.google.com/file/d/1GFq1jcV00BjFEa7hmZSO1xD7K4j4gv3O/view?usp=sharing'
+    gdown.download(url, 'commodities.csv', fuzzy=True)
+    data = pd.read_csv('commodities.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)
 
 
 def cryptocurrencies_returns(assets, weights, from_date, to_date):
-    """
-    Constructs the returns of crypto portfolio
-    Args:
-    assets - tickers of assets
-    Possible assets:
-    ADA, BNB, BTC, BUSD, DOGE, ETH, SOL, USDC, USDT, XRP
-
-    weights - weights of portfolio, should sum up to one
-    from_date - start date, mm/dd/yyyy
-    to_date - end_date, mm/dd/yyyy
-    """
-    check_data_download()
-    data = construct_data('crypto', assets, from_date, to_date)
-    return construct_portfolio(data, assets, weights, from_date, to_date)
-
-
-def check_data_download():
-    """
-    Checks whether data has been downloaded locally
-    """
-    if 'data' not in os.listdir():
-        subprocess.run(['wget', 'https://www.dropbox.com/s/vq15wiopso1wm76/data_sampling.zip?dl=0', '-O', 'data.zip', '-q'])
-        subprocess.run(['unzip', '-q', 'data.zip'])
-        subprocess.run(['rm', 'data.zip'])
-        subprocess.run(['rm', '-r', '__MACOSX'])
-
-
-def construct_data(folder, assets):
-    """
-    Constructs pd.DataFrame of selected assets from a folder
-    Args:
-    assets - list of assets
-    folder - options: stocks, commodities, crypto
-    from_date - start date
-    to_date - end date
-    """
-    data = pd.DataFrame()
-    for asset in assets:
-        path = os.path.join('data',folder,asset + '.csv')
-        # Read data and set datetime index
-        series = pd.read_csv(path)
-        series['Date'] = pd.to_datetime(series['Date'])
-        series = series.set_index('Date')
-        data[asset] = series['Price']
-
-    # Reverse data so upper row is latest value
-    return data[::-1]
-
-
-def construct_portfolio(data, assets, weights, from_date, to_date):
-    """
-    Constructs portfolio of returns from data
-    Args:
-    data - data constructed in construct_data
-    assets - list of assets
-    weights - weights of portfolio, should sum up to one
-    """
-    assert abs(sum(weights) - 1) < .001, 'Weights of portfolio are incorrect!'
-
-    weights_ =  {asset : weight for asset, weight in zip(assets, weights)}
-
-    # Construct portfolio
-    portfolio = sum([weights_[asset] * data[asset] for asset in assets])
-    portfolio = portfolio.pct_change().fillna(0)
-    # Slice data according to dates
-    portfolio = portfolio[(portfolio.index >= from_date) & (portfolio.index <= to_date)]
-
-    return portfolio
+    url = 'https://drive.google.com/file/d/1mPP5Vb57Jc2mYPeLYZPgAJM8ogjiguSO/view?usp=sharing'
+    gdown.download(url, 'cryptocurrencies.csv', fuzzy=True)
+    data = pd.read_csv('cryptocurrencies.csv', index_col=0)
+    return _get_returns(data, assets, weights, from_date, to_date)

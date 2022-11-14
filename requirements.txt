@@ -1,3 +1,7 @@
 pandas
 numpy
+scipy
+arch
+pytest
+gdown
 pytest

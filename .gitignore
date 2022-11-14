@@ -1,5 +1,5 @@
-# Pycache
 __pycache__
-
-# Data
-data
+.DS_Store
+stocks.csv
+cryptocurrencies.csv
+commodities.csv
