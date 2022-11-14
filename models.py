@@ -1,3 +1,4 @@
+import numpy as np
 from arch import arch_model
 from scipy.stats import norm
 
