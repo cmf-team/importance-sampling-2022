@@ -2,3 +2,5 @@ pandas
 numpy
 scipy
 arch
+gdown
+

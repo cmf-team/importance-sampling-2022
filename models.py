@@ -1,7 +1,6 @@
 from arch import arch_model
 from scipy.stats import norm
 
-
 class RiskMetrics:
     '''
     Longerstaey, Jacques, and Martin Spencer. "Riskmetricstm—technical
@@ -14,8 +13,10 @@ class RiskMetrics:
         self.window_size = 74
 
     def forecast(self, feat):
-        raise Exception(NotImplementedError)
-
+        sigma2 = 0
+        for i in range(1,len(feat)):
+            sigma2 = self.lambd * sigma2 + (1 - self.lambd) * feat.iloc[i - 1] ** 2   
+        return norm.ppf(1 - self.alpha, scale = sigma2**0.5)
 
 class HistoricalSimulation:
     def __init__(self, alpha, window_size):
@@ -23,7 +24,8 @@ class HistoricalSimulation:
         self.window_size = window_size
 
     def forecast(self, feat):
-        raise Exception(NotImplementedError)
+        return feat.iloc[-self.window_size:].quantile(1-self.alpha)
+
 
 
 class GARCH11:
