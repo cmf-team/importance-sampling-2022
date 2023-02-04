@@ -20,7 +20,7 @@ class Dataloader:
         feat_idx = []
         target_idx = []
         for i in range(self.first_pred, self.series.shape[0], self.step_size):
-            feat_idx.append(range(i - self.horizon - self.window_size, i - self.horizon))
+            feat_idx.append(range(i-self.horizon-self.window_size+1, i-self.horizon+1))
             target_idx.append(i)
         self.feat_idx = feat_idx
         self.target_idx = target_idx
