@@ -3,7 +3,29 @@ import numpy as np
 from scipy.stats import chi2
 
 
-def pof_test(var, target, alpha=0.99):
+def pof_test(
+        var: np.ndarray, 
+        target: np.ndarray, 
+        alpha: int = 0.99,
+    ):
+    """
+    Kupiec’s Proportion of Failure Test (POF). Tests that a number of exceptions 
+    corresponds to the VaR confidence level.
+    
+    Parameters
+    ----------
+    var
+        Predicted VaRs.
+    target
+        Corresponded returns.
+    alpha
+        VaR confidence level. Default is 0.99.
+    
+    Returns
+    ----------
+    float
+        p-value of POF test.
+    """
     exception = target < var
     t = len(target)
     m = exception.sum()
@@ -14,7 +36,26 @@ def pof_test(var, target, alpha=0.99):
     return pvalue
 
 
-def if_test(var, target):
+def if_test(
+        var: np.ndarray, 
+        target: np.ndarray, 
+    ):
+    """
+    Christofferson Interval Forecast Test (IF). Tests that the probability of 
+    a new exception does not depend on a previous one.
+
+    Parameters
+    ----------
+    var
+        Predicted VaRs.
+    target
+        Corresponded returns.
+    
+    Returns
+    ----------
+    float
+        p-value of IF test.
+    """
     exception = target < var
     pairs = [(exception[i], exception[i+1]) for i in range(len(exception) - 1)]
     pairs = np.array(pairs).astype('int')
@@ -33,6 +74,24 @@ def if_test(var, target):
 
 
 def quantile_loss(var, target, alpha=0.99):
+    """
+    Quantile loss also known as Pinball loss. Measures the discrepancy between 
+    true values and a corresponded 1-alpha quantile.
+    
+    Parameters
+    ----------
+    var
+        Predicted VaRs.
+    target
+        Corresponded returns.
+    alpha
+        VaR confidence level. Default is 0.99.
+    
+    Returns
+    ----------
+    float
+        The value of the quantile loss function.
+    """
     qloss = np.abs(var-target)
     qloss[target < var] = qloss[target < var] * 2 * alpha
     qloss[target >= var] = qloss[target >= var] * 2 * (1 - alpha)
