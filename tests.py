@@ -1,19 +1,29 @@
 import numpy as np
 import pandas as pd
-from data import (
-    stocks_returns, 
-    commodities_returns, 
-    cryptocurrencies_returns, 
-    Dataloader
+from var_models.data import (
+    stocks_data, 
+    commodities_data, 
+    cryptocurrencies_data,
+    Dataloader,
+    get_returns,
+    get_logreturns,
 )
-from metrics import pof_test, if_test, quantile_loss
-from models import HistoricalSimulation, RiskMetrics
+from var_models.metrics import pof_test, if_test, quantile_loss
+from var_models.univariate_models import HistoricalSimulation, RiskMetrics
+from var_models.multivariate_models import VarianceCovariance
+
 
 class TestData:
+    def setup_class(self):
+        self.stocks = stocks_data()
+        self.commodities = commodities_data()
+        self.cryptocurrencies = cryptocurrencies_data()
+
     def test_stocks_returns(self):
         assets = ['AAPL']
         weights = [1.]
-        returns = stocks_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        returns = get_returns(self.stocks, assets, from_date='09/02/2022', to_date='09/07/2022')
+        returns = np.dot(returns, weights)
         test_returns = pd.Series(
             data=[-0.0136, -0.0082, 0.0093], 
             index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
@@ -22,18 +32,20 @@ class TestData:
     
         assets = ['AAPL', 'GOOGL']
         weights = [0.3, 0.7]
-        returns = stocks_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        returns = get_returns(self.stocks, assets, from_date='09/02/2022', to_date='09/07/2022')
+        returns = np.dot(returns, weights)
         test_returns = pd.Series(
-            data=[-0.0158, -0.0091, 0.0188], 
+            data=[-0.0161, -0.0092, 0.0201], 
             index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
 
         assets = ['AAPL', 'AMD', 'AMZN', 'GOOGL', 'INTC', 'META', 'MSFT', 'MU', 'NVDA', 'TSLA']
-        weights = np.ones(10)
-        returns = stocks_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        weights = np.ones(10) / 10
+        returns = get_returns(self.stocks, assets, from_date='09/02/2022', to_date='09/07/2022')
+        returns = np.dot(returns, weights)
         test_returns = pd.Series(
-            data=[-0.0193, -0.0068,  0.0196],
+            data=[-0.0186, -0.0115,  0.0160],
             index=pd.to_datetime(['09/02/2022', '09/06/2022', '09/07/2022']),
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
@@ -44,20 +56,22 @@ class TestData:
             'Heating Oil', 'Gold', 'Silver', 'Copper', 
             'US Coffee C', 'US Corn'
         ]
-        weights = np.ones(9)
-        returns = commodities_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        weights = np.ones(9) / 9
+        returns = get_returns(self.commodities, assets, from_date='09/02/2022', to_date='09/07/2022')
+        returns = np.dot(returns, weights)
         test_returns = pd.Series(
-            data=[ 0.0075,  0.001 , -0.0021],
+            data=[-0.0015, -0.0049 , -0.0177],
             index=pd.to_datetime(['2022-09-02', '2022-09-06', '2022-09-07']),
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
 
     def test_cryptocurrencies_returns(self):
         assets = ['ADA', 'BNB', 'BTC', 'BUSD', 'DOGE', 'ETH', 'USDC', 'USDT', 'XRP']
-        weights = np.ones(9)
-        returns = cryptocurrencies_returns(assets, weights, from_date='09/02/2022', to_date='09/07/2022')
+        weights = np.ones(9) / 9
+        returns = get_returns(self.cryptocurrencies, assets, from_date='09/02/2022', to_date='09/07/2022')
+        returns = np.dot(returns, weights)
         test_returns = pd.Series(
-            data=[-0.0076, -0.0072,  0.0081, -0.0063, -0.0481,  0.026 ],
+            data=[-0.0046, 0.0057, 0.0096, -0.0004, -0.0332, 0.0275],
             index=pd.to_datetime(['2022-09-02', '2022-09-03', '2022-09-04', '2022-09-05', '2022-09-06', '2022-09-07']),
         )
         assert np.allclose(returns, test_returns, atol=0.0001)
@@ -84,18 +98,18 @@ class TestMetrics:
         assert np.isclose(if_test(var, target), 0.2770, atol=0.0001)
 
 
-class TestModels:
+class TestUnivariateModels:
     def setup_class(self):
         assets = ['AAPL', 'GOOGL']
-        weights = [0.3, 0.7]
-        returns = stocks_returns(assets, weights, from_date='09/02/2020', to_date='09/02/2022')
-        logreturns = np.log(returns + 1)
-        self.loader =  Dataloader(
+        weights = [0.3, 0.7]        
+        logreturns = get_logreturns(stocks_data(), assets, from_date='09/02/2020', to_date='09/02/2022')
+        self.loader = Dataloader(
             series=logreturns,
             window_size=125, # a half of trading year
             step_size=1,
             horizon=1,
-            first_pred=125+1
+            first_pred=125+1,
+            weights=weights,
         )
 
     def test_historical_simulation(self):
@@ -122,4 +136,31 @@ class TestModels:
         var = np.array(var)
         target = np.array(target)
         assert np.isclose(quantile_loss(var, target, alpha), 0.0036, atol=0.0001)
+        assert pof_test(var, target, alpha) > 0.05
+
+
+class TestMultivariateModels:
+    def setup_class(self):
+        assets = ['AAPL', 'GOOGL']
+        self.weights = np.array([0.3, 0.7])
+        logreturns = get_logreturns(stocks_data(), assets, from_date='09/02/2020', to_date='09/02/2022')
+        self.loader = Dataloader(
+            series=logreturns,
+            window_size=125, # a half of trading year
+            step_size=1,
+            horizon=1,
+            first_pred=125+1
+        )
+    
+    def test_variance_covariance(self):
+        alpha = 0.8
+        vc = VarianceCovariance(alpha, self.weights)
+        var = []
+        target = []
+        for feat, _target in self.loader:
+            var.append(vc.forecast(feat))
+            target.append(_target @ self.weights)
+        var = np.array(var)
+        target = np.array(target)
+        assert np.isclose(quantile_loss(var, target, alpha), 0.0101, atol=0.0001)
         assert pof_test(var, target, alpha) > 0.05
