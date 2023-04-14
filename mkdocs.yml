@@ -1,0 +1,26 @@
+site_name: VaR models documentation
+
+theme:
+  name: "readthedocs"
+
+plugins:
+- mkdocstrings:
+    default_handler: python
+    handlers:
+      python:
+        options:
+          show_source: false
+    watch:
+        - var_models
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+markdown_extensions:
+  - mdx_math
+
+nav:
+  - VaR models documentation: index.md
+  - Reference: 
+    - Data: reference_data.md
+    - Metrics: reference_metrics.md
+    - Univariate models: reference_univariate_models.md
+    - Multivariate models: reference_multivariate_models.md

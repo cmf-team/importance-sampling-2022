@@ -6,24 +6,24 @@ import pandas as pd
 
 
 class UnivariateVaR(ABC):
+    """
+    Base class for univariate models.
+    """
     @abstractmethod
     def __init__(self, alpha):
         self.alpha = alpha
         super().__init__()
     
     @abstractmethod
-    def forecast(self, returns: pd.Series):
+    def forecast(self, returns: pd.Series) -> float:
         """
         Forecasts VaR by given returns of a portfolio.
 
-        Parameters
-        ----------
-        returns
-            Series with returns of a portfolio where an index is dates.
+        Parameters:
+            returns:
+                Series with returns of a portfolio where an index is dates.
         
-        Returns
-        ----------
-        float
+        Returns:
             Calculated VaR.
         """
         assert len(returns.shape) == 1
@@ -40,10 +40,9 @@ class RiskMetrics(UnivariateVaR):
         document." Morgan Guaranty Trust Company of New York: New York 51
         (1996): 54.
         
-        Parameters
-        ----------
-        alpha
-            VaR confidence level
+        Parameters:
+            alpha:
+                VaR confidence level
         """
         super().__init__(alpha)
         self.lambd = 0.94
@@ -63,12 +62,11 @@ class HistoricalSimulation(UnivariateVaR):
         The historical simulation method is used to calculate VaR based on the 
         emperical quantile of returns of a portfolio.
         
-        Parameters
-        ----------
-        alpha
-            VaR confidence level
-        window_size
-            A size of a window to calculate the empirical quantile.
+        Parameters:
+            alpha:
+                VaR confidence level
+            window_size:
+                A size of a window to calculate the empirical quantile.
         """
         super().__init__(alpha)
         self.window_size = window_size
@@ -84,12 +82,11 @@ class GARCH11(UnivariateVaR):
         The GARCH(1, 1) model is used to calculate VaR based on 
         returns of a portfolio.
         
-        Parameters
-        ----------
-        alpha
-            VaR confidence level
-        window_size
-            A size of a window to fit the GARCH(1, 1) model.
+        Parameters:
+            alpha:
+                VaR confidence level
+            window_size:
+                A size of a window to fit the GARCH(1, 1) model.
         """
         super().__init__(alpha)
         self.window_size = window_size

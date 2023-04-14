@@ -6,24 +6,18 @@ from scipy.stats import chi2
 def pof_test(
         var: np.ndarray, 
         target: np.ndarray, 
-        alpha: int = 0.99,
-    ):
+        alpha: float = 0.99,
+    ) -> float:
     """
     Kupiec’s Proportion of Failure Test (POF). Tests that a number of exceptions 
     corresponds to the VaR confidence level.
     
-    Parameters
-    ----------
-    var
-        Predicted VaRs.
-    target
-        Corresponded returns.
-    alpha
-        VaR confidence level. Default is 0.99.
+    Parameters:
+        var: Predicted VaRs.
+        target: Corresponded returns.
+        alpha: VaR confidence level. Default is 0.99.
     
-    Returns
-    ----------
-    float
+    Returns:
         p-value of POF test.
     """
     exception = target < var
@@ -39,21 +33,18 @@ def pof_test(
 def if_test(
         var: np.ndarray, 
         target: np.ndarray, 
-    ):
+    ) -> float:
     """
     Christofferson Interval Forecast Test (IF). Tests that the probability of 
     a new exception does not depend on a previous one.
 
-    Parameters
-    ----------
-    var
-        Predicted VaRs.
-    target
-        Corresponded returns.
+    Parameters:
+        var:
+            Predicted VaRs.
+        target:
+            Corresponded returns.
     
-    Returns
-    ----------
-    float
+    Returns:
         p-value of IF test.
     """
     exception = target < var
@@ -73,23 +64,20 @@ def if_test(
     return pvalue
 
 
-def quantile_loss(var, target, alpha=0.99):
+def quantile_loss(var : np.ndarray, target: np.ndarray, alpha : float = 0.99) -> float:
     """
     Quantile loss also known as Pinball loss. Measures the discrepancy between 
     true values and a corresponded 1-alpha quantile.
     
-    Parameters
-    ----------
-    var
-        Predicted VaRs.
-    target
-        Corresponded returns.
-    alpha
-        VaR confidence level. Default is 0.99.
+    Parameters:
+        var:
+            Predicted VaRs.
+        target:
+            Corresponded returns.
+        alpha:
+            VaR confidence level. Default is 0.99.
     
-    Returns
-    ----------
-    float
+    Returns:
         The value of the quantile loss function.
     """
     qloss = np.abs(var-target)

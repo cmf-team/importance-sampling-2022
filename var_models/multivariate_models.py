@@ -4,6 +4,9 @@ from scipy.stats import norm
 import pandas as pd
 
 class MultivariateVaR(ABC):
+    """
+    Base class for multivariate models.
+    """
     @abstractmethod
     def __init__(self, alpha, weights):
         self.alpha = alpha
@@ -15,18 +18,15 @@ class MultivariateVaR(ABC):
     def forecast(
             self, 
             returns: pd.DataFrame,
-        ):
+        ) -> float:
         """
         Forecasts VaR by given returns of assets.
 
-        Parameters
-        ----------
-        returns
-            A dataframe with returns where an index is dates and columns are assets.
+        Parameters:
+            returns:
+                A dataframe with returns where an index is dates and columns are assets.
         
-        Returns
-        ----------
-        float
+        Returns:
             Calculated VaR.
         """
         assert len(returns.shape) == 2 and returns.shape[1] > 1
@@ -44,13 +44,12 @@ class VarianceCovariance(MultivariateVaR):
         The variance-covariance method is used to calculate VaR based on returns 
         of each asset in a portfolio.
 
-        Parameters
-        ----------
-        alpha
-            VaR confidence level
-        weights
-            An array of weights of assets in a portfolio, should be summed up to 1.
-            If not provided, the dataloader iterates over all assets' returns.
+        Parameters:
+            alpha:
+                VaR confidence level
+            weights:
+                An array of weights of assets in a portfolio, should be summed up to 1.
+                If not provided, the dataloader iterates over all assets' returns.
         """
         super().__init__(alpha, weights)
 

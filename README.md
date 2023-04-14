@@ -1,3 +1,13 @@
-# Modeling Tails of Distributions by Importance Sampling: Application in Risk-Management
+# VaR models
 
-This repository contains code for the project "Modeling Tails of Distributions by Importance Sampling: Application in Risk-Management". The aim of the project is to estimate Value at Risk (VaR) and Expected Shortfall (ES) risk measurements of a financial portfolio by the Importance Sampling technique.
+"VaR models" is a Pyhton package for the creation, training and backtesting of Value-at-Risk (VaR) models.
+
+## Installation
+
+## Models
+
+## Datasets
+
+## Metrics
+
+## Documentation

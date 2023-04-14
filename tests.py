@@ -104,7 +104,7 @@ class TestUnivariateModels:
         weights = [0.3, 0.7]        
         logreturns = get_logreturns(stocks_data(), assets, from_date='09/02/2020', to_date='09/02/2022')
         self.loader = Dataloader(
-            series=logreturns,
+            returns=logreturns,
             window_size=125, # a half of trading year
             step_size=1,
             horizon=1,
@@ -145,11 +145,11 @@ class TestMultivariateModels:
         self.weights = np.array([0.3, 0.7])
         logreturns = get_logreturns(stocks_data(), assets, from_date='09/02/2020', to_date='09/02/2022')
         self.loader = Dataloader(
-            series=logreturns,
+            returns=logreturns,
             window_size=125, # a half of trading year
             step_size=1,
             horizon=1,
-            first_pred=125+1
+            first_pred=125+1,
         )
     
     def test_variance_covariance(self):
